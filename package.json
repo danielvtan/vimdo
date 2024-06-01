@@ -1,23 +1,24 @@
 {
-  "name": "@chillvibekid/tasky",
+  "name": "vimdo",
   "version": "1.0.0",
-  "description": "a basic cli tool to help manage project todo lists in markdown format",
+  "description": "a basic cli tool to help manage project todo lists in markdown format with vim commands",
   "preferGlobal": true,
   "main": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tasky": "npx tsc && node dist/index.js"
+    "vimdo": "npx tsc && node dist/index.js"
   },
   "author": "danielvtan",
   "repository": {
     "type": "git",
-    "url": "https://github.com/danielvtan/tasky.git"
+    "url": "https://github.com/danielvtan/vimdo.git"
   },
   "keywords": [
     "cli",
     "todo",
     "task",
-    "tools"
+    "tools",
+    "vim"
   ],
   "license": "ISC",
   "dependencies": {
@@ -25,7 +26,7 @@
     "keypress": "^0.2.1"
   },
   "bin": {
-    "tasky": "./dist/index.js"
+    "vimdo": "./dist/index.js"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",

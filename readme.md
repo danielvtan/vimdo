@@ -1,7 +1,7 @@
-# TASKY with basic vim
+# VIMDO with basic vim
 a basic cli tool to help manage project todo lists in markdown format
 
-![TASKY screenshot](https://raw.githubusercontent.com/danielvtan/tasky/main/screenshots/screenshot.png)
+![VIMDO screenshot](https://raw.githubusercontent.com/danielvtan/vimdo/main/screenshots/screenshot.png)
 
 
 # Current features
@@ -12,17 +12,17 @@ a basic cli tool to help manage project todo lists in markdown format
 # How to use
 install
 ```
-npm install -g tasky
+npm install -g vimdo
 ````
 to run, go to the specific project folder
 ```
-tasky
+vimdo
 ````
-running tasky without optional file argument will try to look for todo.md and readme.md files (respectively).
-if both files are not present, tasky will start in draft mode and will create a todo.md file on save
+running vimdo without optional file argument will try to look for todo.md and readme.md files (respectively).
+if both files are not present, vimdo will start in draft mode and will create a todo.md file on save
 to select specific .md file, add the filename as optional argument
 ```
-tasky filename.md
+vimdo filename.md
 ```
 
 # TODO features
@@ -45,3 +45,4 @@ tasky filename.md
 
 # Current limitation 
 - will not work properly for markdown files with multiple separate checklists
+

@@ -1,5 +1,5 @@
 {
-  "name": "tasky",
+  "name": "@chillvibekid/tasky",
   "version": "1.0.0",
   "description": "a basic cli tool to help manage project todo lists in markdown format",
   "preferGlobal": true,
@@ -8,7 +8,17 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "tasky": "npx tsc && node dist/index.js"
   },
-  "author": "",
+  "author": "danielvtan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielvtan/tasky.git"
+  },
+  "keywords": [
+    "cli",
+    "todo",
+    "task",
+    "tools"
+  ],
   "license": "ISC",
   "dependencies": {
     "ansi-colors": "^4.1.3",

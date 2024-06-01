@@ -1,7 +1,7 @@
 {
-  "name": "task.md",
+  "name": "tasky",
   "version": "1.0.0",
-  "description": "a basic cli tool to help with simple tasks",
+  "description": "a basic cli tool to help with managing daily tasks",
   "preferGlobal": true,
   "main": "./dist/index.js",
   "scripts": {

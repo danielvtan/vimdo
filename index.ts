@@ -36,7 +36,7 @@ let lines: Line[] = [
 ];
 const preLine: Line = {
   title: "DO", description: "Shortcuts",
-  render: c.white(`${c.cyanBright("TODO.md")} with basic VIM navigation
+  render: c.white(`${c.cyanBright("TASKY")} with basic VIM navigation
 ${c.gray(`${c.underline("h/j")} up/down movement \t\t| ${c.underline.cyan("space")} to complete task
 ${c.underline("a/A/i/I")} to enter edit mode \t| ${c.underline("ctrl+c")} to exit
 ${c.underline("ctrl+s or :w<return>")} to save

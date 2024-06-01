@@ -1,13 +1,13 @@
 # TASKY with basic vim
 a basic cli tool to help manage project todo lists in markdown format
 
+![TASKY screenshot](https://raw.githubusercontent.com/danielvtan/tasky/main/screenshots/screenshot.png)
+
+
 # Current features
 - can read checklist in markdown files
 - insert checklist updates in the markdown file
 - simulates basic vim commands
-
-# Current limitation 
-- will not work properly for markdown files with multiple separate checklists
 
 # How to use
 install
@@ -42,3 +42,6 @@ tasky filename.md
 - [ ] vim: delete from cursor to end of word (d+w)
 - [ ] sync to a web app
 - [ ] sync to a mobile app
+
+# Current limitation 
+- will not work properly for markdown files with multiple separate checklists

@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 import c from 'ansi-colors';
-
-// import c from 'chalk';
 import keypress from 'keypress';
-import clipboard from 'clipboardy';
 
 keypress(process.stdin);
 process.stdout.write("\u001B[?25l");
@@ -269,7 +266,7 @@ var ACTION = {
     const todo = lines.map(line => UTIL.format({ line })).join("\n");
 
     const content = preTodo + todo + postTodo;
-    fs.writeFile(selectedFile, content, (err: any) => {
+    fs.writeFile(selectedFile ?? "todo.md", content, (err: any) => {
       if (err) {
         console.error(err);
       } else {

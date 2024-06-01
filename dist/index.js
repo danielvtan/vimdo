@@ -50,7 +50,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var ansi_colors_1 = __importDefault(require("ansi-colors"));
-// import c from 'chalk';
 var keypress_1 = __importDefault(require("keypress"));
 (0, keypress_1.default)(process.stdin);
 process.stdout.write("\u001B[?25l");
@@ -74,7 +73,7 @@ for (var i = 0; i < process.argv.length; i++) {
 var lines = [];
 var preLine = {
     title: "DO", description: "Shortcuts",
-    render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("TODO.md"), " with basic VIM navigation\n").concat(ansi_colors_1.default.gray("".concat(ansi_colors_1.default.underline("h/j"), " up/down movement \t\t| ").concat(ansi_colors_1.default.underline.cyan("space"), " to complete task\n").concat(ansi_colors_1.default.underline("a/A/i/I"), " to enter edit mode \t| ").concat(ansi_colors_1.default.underline("ctrl+c"), " to exit\n").concat(ansi_colors_1.default.underline("ctrl+s or :w<return>"), " to save\n"))))
+    render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("TASKY"), " with basic VIM navigation\n").concat(ansi_colors_1.default.gray("".concat(ansi_colors_1.default.underline("h/j"), " up/down movement \t\t| ").concat(ansi_colors_1.default.underline.cyan("space"), " to complete task\n").concat(ansi_colors_1.default.underline("a/A/i/I"), " to enter edit mode \t| ").concat(ansi_colors_1.default.underline("ctrl+c"), " to exit\n").concat(ansi_colors_1.default.underline("ctrl+s or :w<return>"), " to save\n"))))
 };
 var postLine = {
     title: ""
@@ -312,7 +311,7 @@ var ACTION = {
         var fs = require('node:fs');
         var todo = lines.map(function (line) { return UTIL.format({ line: line }); }).join("\n");
         var content = preTodo + todo + postTodo;
-        fs.writeFile(selectedFile, content, function (err) {
+        fs.writeFile(selectedFile !== null && selectedFile !== void 0 ? selectedFile : "todo.md", content, function (err) {
             if (err) {
                 console.error(err);
             }

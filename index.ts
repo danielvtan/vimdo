@@ -155,6 +155,20 @@ var UTIL = {
       case "up":
         cursor.y -= 1;
         return cursor;
+      case "J":
+        var currentLine = lines[cursor.y];
+        var targetLine = lines[cursor.y + 1];
+        lines[cursor.y + 1] = currentLine;
+        lines[cursor.y] = targetLine;
+        cursor.y += 1;
+        return cursor;
+      case "K":
+        var currentLine = lines[cursor.y];
+        var targetLine = lines[cursor.y - 1];
+        lines[cursor.y - 1] = currentLine;
+        lines[cursor.y] = targetLine;
+        cursor.y -= 1;
+        return cursor;
       case "delete":
         ACTION.delete();
         return cursor;
@@ -217,6 +231,7 @@ var UTIL = {
 
 let preTodo = "";
 let postTodo = "";
+let listHeader = "";
 var ACTION = {
   read: async () => {
     const fs = require('node:fs/promises');
@@ -242,9 +257,11 @@ var ACTION = {
       console.log(e);
       data = "# TODO\n\n- [ ] ";
     }
+    const listHeaderIndex = data.split("\n").findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]")) - 1;
     const startIndex = data.split("\n").findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
     const lastIndex = data.split("\n").findLastIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
     // Math.max(cursor.x - 2, 0)console.log(startIndex, lastIndex)
+    listHeader = data.split("\n")[listHeaderIndex];
     preTodo = data.split("\n").slice(0, startIndex).join("\n") + "\n";
     postTodo = "\n" + data.split("\n").slice(lastIndex + 1, data.split("\n").length - 1).join("\n");
     data = data.split("\n").slice(startIndex, lastIndex + 1).filter(d => d).map(d => {
@@ -295,6 +312,7 @@ var ACTION = {
 
     process.stdout.write(
       UTIL.format({ line: preLine }) + "\n" +
+      UTIL.format({ line: { render: c.cyan(listHeader) } }) + "\n" +
       lines.map((line, index) => {
         return UTIL.format({
           line,

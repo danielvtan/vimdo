@@ -188,6 +188,20 @@ var UTIL = {
             case "up":
                 cursor.y -= 1;
                 return cursor;
+            case "J":
+                var currentLine = lines[cursor.y];
+                var targetLine = lines[cursor.y + 1];
+                lines[cursor.y + 1] = currentLine;
+                lines[cursor.y] = targetLine;
+                cursor.y += 1;
+                return cursor;
+            case "K":
+                var currentLine = lines[cursor.y];
+                var targetLine = lines[cursor.y - 1];
+                lines[cursor.y - 1] = currentLine;
+                lines[cursor.y] = targetLine;
+                cursor.y -= 1;
+                return cursor;
             case "delete":
                 ACTION.delete();
                 return cursor;
@@ -248,9 +262,10 @@ var UTIL = {
 };
 var preTodo = "";
 var postTodo = "";
+var listHeader = "";
 var ACTION = {
     read: function () { return __awaiter(void 0, void 0, void 0, function () {
-        var fs, directory, fileSearch, fileOptions, data, e_1, startIndex, lastIndex;
+        var fs, directory, fileSearch, fileOptions, data, e_1, listHeaderIndex, startIndex, lastIndex;
         var _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -284,9 +299,11 @@ var ACTION = {
                     data = "# TODO\n\n- [ ] ";
                     return [3 /*break*/, 5];
                 case 5:
+                    listHeaderIndex = data.split("\n").findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); }) - 1;
                     startIndex = data.split("\n").findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
                     lastIndex = data.split("\n").findLastIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
                     // Math.max(cursor.x - 2, 0)console.log(startIndex, lastIndex)
+                    listHeader = data.split("\n")[listHeaderIndex];
                     preTodo = data.split("\n").slice(0, startIndex).join("\n") + "\n";
                     postTodo = "\n" + data.split("\n").slice(lastIndex + 1, data.split("\n").length - 1).join("\n");
                     data = data.split("\n").slice(startIndex, lastIndex + 1).filter(function (d) { return d; }).map(function (d) {
@@ -339,6 +356,7 @@ var ACTION = {
             //   process.stdout.clearLine();
             // }
             process.stdout.write(UTIL.format({ line: preLine }) + "\n" +
+                UTIL.format({ line: { render: ansi_colors_1.default.cyan(listHeader) } }) + "\n" +
                 lines.map(function (line, index) {
                     return UTIL.format({
                         line: line,

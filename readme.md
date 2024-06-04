@@ -27,9 +27,12 @@ vimdo filename.md
 
 # TODO features
 - [x] get folder
-- [x] check if folder has readme.md or todo.md
 - [x] add args to add ability to select which md to use
-- [ ] display markdown heading as tasks list header
+- [x] check if folder has readme.md or todo.md
+- [x] vim: move task up and down (shift+j/k)
+- [x] display markdown list heading as tasks list header
+- [ ] display markdown title as project name
+- [ ] display filename as file name
 - [ ] able to transform issue links (support for bitbucket and github)
 - [ ] if there is no file ask to create file
 - [ ] add pomodoro option. ex. tasks with timer
@@ -37,12 +40,10 @@ vimdo filename.md
 - [ ] add option to create sub task when pressing tab
 - [ ] add set default option
 - [ ] add progress view
-- [ ] add git shortcuts
+- [ ] git: add git shortcuts
+- [ ] git: use done task as commit message
 - [ ] vim: move by start of word (w/b)
 - [ ] vim: delete from cursor to end of word (d+w)
-- [ ] sync to a web app
-- [ ] sync to a mobile app
-
-# Current limitation 
-- will not work properly for markdown files with multiple separate checklists
-
+- [ ] sync: to a web app
+- [ ] sync: to a mobile app
+- [ ] 

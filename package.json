@@ -1,6 +1,6 @@
 {
   "name": "vimdo",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a basic cli tool to help manage project todo lists in markdown format with vim commands",
   "preferGlobal": true,
   "main": "./dist/index.js",

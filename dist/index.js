@@ -56,7 +56,14 @@ process.stdout.write("\u001B[?25l");
 process.stdin.setRawMode(true);
 process.stdin.setEncoding('utf8');
 // process.stdout._handle.setBlocking(true);
+// let deltaTime = 0
+// let lastTime = new Date().getTime();
 process.stdin.on('keypress', function (ch, key) {
+    // const currentTime = new Date().getTime();
+    // deltaTime = currentTime - lastTime;
+    // if (deltaTime < 100) return;
+    //
+    // lastTime = currentTime;
     // console.log("ch", ch)
     // console.log("key", key)
     if (ch && !key)
@@ -82,6 +89,58 @@ var inputs = [];
 var cursor = { x: 4, y: lines.length - 1 };
 var isEditMode = false;
 var UTIL = {
+    getPostLine: function () {
+        var _a;
+        postLine = {
+            title: ">",
+            render: ansi_colors_1.default.white((_a = "> " + __spreadArray([], inputs, true).reverse().join("") + " " + cursor.word) !== null && _a !== void 0 ? _a : ""),
+        };
+        var selectedLink = "";
+        for (var key in linkList) {
+            if ((cursor === null || cursor === void 0 ? void 0 : cursor.word) == key) {
+                selectedLink = linkList[key];
+                cursor.link = selectedLink;
+            }
+        }
+        if (selectedLink) {
+            postLine.render += " shift+t to open link: " + selectedLink;
+        }
+        return postLine;
+    },
+    replaceURL: function (text) {
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, function (url) {
+            var urlSplit = url.split("https://")[1].split("/");
+            var text = urlSplit[2] + "#" + urlSplit[4];
+            linkList[text] = url;
+            return text;
+        });
+    },
+    renderURL: function (text, linkIndexes) {
+        var textSplit = text.split(" ");
+        for (var key in linkIndexes) {
+            for (var index = 0; index < linkIndexes[key].length; index++) {
+                var pos = linkIndexes[key][index];
+                textSplit[pos] = ansi_colors_1.default.blue.underline(textSplit[pos]);
+            }
+        }
+        return textSplit.join(" ");
+    },
+    findURL: function (text) {
+        var linkIndexes = {};
+        var _loop_1 = function (key) {
+            linkIndexes[key] = [];
+            text.split(" ").map(function (word, index) {
+                if (word == key) {
+                    linkIndexes[key].push(index);
+                }
+            });
+        };
+        for (var key in linkList) {
+            _loop_1(key);
+        }
+        return linkIndexes;
+    },
     input: function (cursor, _a) {
         var _b;
         var name = _a.name, ctrl = _a.ctrl, meta = _a.meta, shift = _a.shift, sequence = _a.sequence;
@@ -91,6 +150,7 @@ var UTIL = {
         // console.log({ name, ctrl, meta, shift, sequence }, inputs.join(""))
         var isExit = ctrl && name == 'c';
         var isSave = ctrl && name == 's';
+        var isLinkOpen = shift && name == 't';
         var isDelete = inputs.join("").startsWith("dd");
         var isTryingToSave = inputs.join("").startsWith("\rw:");
         if (isEditMode) {
@@ -135,10 +195,9 @@ var UTIL = {
             inputs = [];
             input = "delete";
         }
-        postLine = {
-            title: ">",
-            render: ansi_colors_1.default.white("> " + __spreadArray([], inputs, true).reverse().join("")),
-        };
+        if (isLinkOpen) {
+            input = "link_open";
+        }
         switch (input) {
             case "x":
                 var titleArray = lines[cursor.y].title.split("");
@@ -202,6 +261,10 @@ var UTIL = {
                 lines[cursor.y] = targetLine;
                 cursor.y -= 1;
                 return cursor;
+            case "link_open":
+                var start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
+                require('child_process').exec(start + ' ' + (cursor === null || cursor === void 0 ? void 0 : cursor.link));
+                return cursor;
             case "delete":
                 ACTION.delete();
                 return cursor;
@@ -233,28 +296,29 @@ var UTIL = {
         };
         var prefix = (_c = (_b = prefixes[line.type]) === null || _b === void 0 ? void 0 : _b[line.done]) !== null && _c !== void 0 ? _c : "";
         var value = (_d = line.render) !== null && _d !== void 0 ? _d : line.title;
-        var lineText = value;
-        var render;
+        var lineText = UTIL.replaceURL(value);
+        var linkIndexes = UTIL.findURL(lineText);
+        var render = lineText;
         if (isSelected) {
             var lineTextArray = lineText.split("");
-            // if (!isEditMode) {
             var selectedX = cursor.x;
-            // if (cursor?.x == 0) {
-            //   selectedX = 3
-            // }
-            // if (cursor?.x > 0) {
-            //   selectedX = cursor.x + 5;
-            // }
             lineTextArray[selectedX] = editModeBG[isEditMode.toString()]((_e = lineTextArray[selectedX]) !== null && _e !== void 0 ? _e : " ");
-            // }
-            render = ansi_colors_1.default.cyan(lineTextArray.join(""));
-            prefix = ansi_colors_1.default.cyan(prefix);
-        }
-        else {
-            render = ansi_colors_1.default.white.dim(lineText);
+            var textFromStartToCursor = lineText.substring(0, cursor.x);
+            var selectedWordIndex = textFromStartToCursor.replace(/[^ ]/g, "").length;
+            var selectedWord = lineText.split(" ")[selectedWordIndex];
+            cursor.word = selectedWord;
+            render = lineTextArray.join("");
         }
         if (line.done) {
             render = ansi_colors_1.default.strikethrough(render);
+        }
+        render = UTIL.renderURL(render, linkIndexes);
+        if (isSelected) {
+            render = ansi_colors_1.default.cyan(render);
+            prefix = ansi_colors_1.default.cyan(prefix);
+        }
+        else {
+            render = ansi_colors_1.default.white.dim(render);
         }
         render = prefix + render;
         return index == undefined ? prefix + value : render;
@@ -263,38 +327,36 @@ var UTIL = {
 var preTodo = "";
 var postTodo = "";
 var listHeader = "";
+var linkList = {};
 var ACTION = {
     read: function () { return __awaiter(void 0, void 0, void 0, function () {
         var fs, directory, fileSearch, fileOptions, data, e_1, listHeaderIndex, startIndex, lastIndex;
-        var _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
                     fs = require('node:fs/promises');
                     return [4 /*yield*/, fs.readdir("./")];
                 case 1:
-                    directory = _b.sent();
-                    // console.log(directory);
-                    if (!selectedFile) {
-                        fileSearch = ["todo.md", "readme.md"];
-                        fileOptions = [];
-                        directory.map(function (f) {
-                            if (fileSearch.includes(f.toLowerCase())) {
-                                fileOptions.push(f);
-                            }
-                        });
-                        selectedFile = (_a = fileOptions[0]) !== null && _a !== void 0 ? _a : selectedFile;
-                    }
+                    directory = _a.sent();
+                    console.log(directory);
+                    fileSearch = ["todo.md", "readme.md"];
+                    fileOptions = [];
+                    directory.map(function (f) {
+                        if (fileSearch.includes(f.toLowerCase())) {
+                            fileOptions.push(f);
+                        }
+                    });
+                    selectedFile = selectedFile !== null && selectedFile !== void 0 ? selectedFile : fileOptions[0];
                     console.log(selectedFile);
-                    _b.label = 2;
+                    _a.label = 2;
                 case 2:
-                    _b.trys.push([2, 4, , 5]);
+                    _a.trys.push([2, 4, , 5]);
                     return [4 /*yield*/, fs.readFile(selectedFile, { encoding: 'utf8' })];
                 case 3:
-                    data = _b.sent();
+                    data = _a.sent();
                     return [3 /*break*/, 5];
                 case 4:
-                    e_1 = _b.sent();
+                    e_1 = _a.sent();
                     console.log(e_1);
                     data = "# TODO\n\n- [ ] ";
                     return [3 /*break*/, 5];
@@ -364,7 +426,7 @@ var ACTION = {
                         cursor: cursor
                     }) + "\n";
                 }).join("")
-                + "\n" + UTIL.format({ line: postLine }));
+                + "\n" + UTIL.format({ line: UTIL.getPostLine() }));
             return [2 /*return*/];
         });
     }); },

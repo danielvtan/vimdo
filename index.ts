@@ -7,7 +7,16 @@ process.stdout.write("\u001B[?25l");
 process.stdin.setRawMode(true);
 process.stdin.setEncoding('utf8');
 // process.stdout._handle.setBlocking(true);
+
+// let deltaTime = 0
+// let lastTime = new Date().getTime();
 process.stdin.on('keypress', function(ch, key) {
+  // const currentTime = new Date().getTime();
+  // deltaTime = currentTime - lastTime;
+  // if (deltaTime < 100) return;
+  //
+  // lastTime = currentTime;
+
   // console.log("ch", ch)
   // console.log("key", key)
   if (ch && !key) key = { sequence: ch }
@@ -46,11 +55,62 @@ let postLine: Line = {
 type Cursor = {
   x?: number;
   y?: number;
+  word?: string;
+  link?: string;
 }
 let inputs = [];
 let cursor: Cursor = { x: 4, y: lines.length - 1 };
 let isEditMode = false;
 var UTIL = {
+  getPostLine: () => {
+    postLine = {
+      title: ">",
+      render: c.white("> " + [...inputs].reverse().join("") + " " + cursor.word ?? ""),
+    }
+    let selectedLink = "";
+    for (const key in linkList) {
+      if (cursor?.word == key) {
+        selectedLink = linkList[key]
+        cursor.link = selectedLink;
+      }
+    }
+    if (selectedLink) {
+      postLine.render += " shift+t to open link: " + selectedLink
+    }
+    return postLine;
+  },
+  replaceURL: (text: string) => {
+    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, function(url) {
+      let urlSplit = url.split("https://")[1].split("/");
+      let text = urlSplit[2] + "#" + urlSplit[4];
+      linkList[text] = url;
+      return text;
+    });
+  },
+  renderURL: (text, linkIndexes) => {
+    let textSplit = text.split(" ");
+    for (const key in linkIndexes) {
+      for (let index = 0; index < linkIndexes[key].length; index++) {
+        const pos = linkIndexes[key][index];
+        textSplit[pos] = c.blue.underline(textSplit[pos])
+
+      }
+    }
+    return textSplit.join(" ");
+  },
+  findURL: (text) => {
+    const linkIndexes = {}
+    for (const key in linkList) {
+      linkIndexes[key] = [];
+      text.split(" ").map((word, index) => {
+        if (word == key) {
+          linkIndexes[key].push(index);
+        }
+      })
+    }
+    return linkIndexes;
+  },
   input: (cursor, { name, ctrl, meta, shift, sequence }) => {
     inputs.unshift(sequence);
 
@@ -59,6 +119,7 @@ var UTIL = {
     // console.log({ name, ctrl, meta, shift, sequence }, inputs.join(""))
     const isExit = ctrl && name == 'c';
     const isSave = ctrl && name == 's';
+    const isLinkOpen = shift && name == 't';
     const isDelete = inputs.join("").startsWith("dd");
     const isTryingToSave = inputs.join("").startsWith("\rw:");
     if (isEditMode) {
@@ -101,9 +162,8 @@ var UTIL = {
       inputs = [];
       input = "delete"
     }
-    postLine = {
-      title: ">",
-      render: c.white("> " + [...inputs].reverse().join("")),
+    if (isLinkOpen) {
+      input = "link_open"
     }
     switch (input) {
       case "x":
@@ -169,6 +229,10 @@ var UTIL = {
         lines[cursor.y] = targetLine;
         cursor.y -= 1;
         return cursor;
+      case "link_open":
+        var start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
+        require('child_process').exec(start + ' ' + cursor?.link);
+        return cursor;
       case "delete":
         ACTION.delete();
         return cursor;
@@ -200,31 +264,35 @@ var UTIL = {
     let prefix = prefixes[line.type]?.[line.done] ?? "";
 
     let value = line.render ?? line.title;
-    let lineText = value;
+    let lineText = UTIL.replaceURL(value);
+    const linkIndexes = UTIL.findURL(lineText);
 
-    let render: string;
+    let render: string = lineText;
     if (isSelected) {
       let lineTextArray = lineText.split("");
-      // if (!isEditMode) {
       let selectedX = cursor.x;
-      // if (cursor?.x == 0) {
-      //   selectedX = 3
-      // }
-      // if (cursor?.x > 0) {
-      //   selectedX = cursor.x + 5;
-      // }
       lineTextArray[selectedX] = editModeBG[isEditMode.toString()](lineTextArray[selectedX] ?? " ");
-      // }
-      render = c.cyan(lineTextArray.join(""))
-      prefix = c.cyan(prefix)
-    } else {
-      render = c.white.dim(lineText)
+
+      const textFromStartToCursor = lineText.substring(0, cursor.x);
+      const selectedWordIndex = textFromStartToCursor.replace(/[^ ]/g, "").length
+      const selectedWord = lineText.split(" ")[selectedWordIndex];
+      cursor.word = selectedWord;
+
+      render = lineTextArray.join("")
     }
     if (line.done) {
       render = c.strikethrough(render);
     }
-    render = prefix + render;
+    render = UTIL.renderURL(render, linkIndexes);
 
+
+    if (isSelected) {
+      render = c.cyan(render)
+      prefix = c.cyan(prefix)
+    } else {
+      render = c.white.dim(render)
+    }
+    render = prefix + render;
     return index == undefined ? prefix + value : render;
   }
 }
@@ -232,23 +300,22 @@ var UTIL = {
 let preTodo = "";
 let postTodo = "";
 let listHeader = "";
+const linkList = {};
 var ACTION = {
   read: async () => {
     const fs = require('node:fs/promises');
     let directory = await fs.readdir("./");
-    // console.log(directory);
+    console.log(directory);
 
 
-    if (!selectedFile) {
-      var fileSearch = ["todo.md", "readme.md"];
-      var fileOptions = [];
-      directory.map((f: string) => {
-        if (fileSearch.includes(f.toLowerCase())) {
-          fileOptions.push(f);
-        }
-      });
-      selectedFile = fileOptions[0] ?? selectedFile;
-    }
+    var fileSearch = ["todo.md", "readme.md"];
+    var fileOptions = [];
+    directory.map((f: string) => {
+      if (fileSearch.includes(f.toLowerCase())) {
+        fileOptions.push(f);
+      }
+    });
+    selectedFile = selectedFile ?? fileOptions[0];
     console.log(selectedFile)
     let data: any;
     try {
@@ -321,7 +388,7 @@ var ACTION = {
         }) + "\n"
 
       }).join("")
-      + "\n" + UTIL.format({ line: postLine })
+      + "\n" + UTIL.format({ line: UTIL.getPostLine() })
     );
   },
   edit: () => {

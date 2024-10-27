@@ -95,51 +95,13 @@ var UTIL = {
             title: ">",
             render: ansi_colors_1.default.white((_a = "> " + __spreadArray([], inputs, true).reverse().join("") + " " + cursor.word) !== null && _a !== void 0 ? _a : ""),
         };
-        var selectedLink = "";
-        for (var key in linkList) {
-            if ((cursor === null || cursor === void 0 ? void 0 : cursor.word) == key) {
-                selectedLink = linkList[key];
-                cursor.link = selectedLink;
-            }
-        }
-        if (selectedLink) {
-            postLine.render += " shift+t to open link: " + selectedLink;
+        // is link
+        var isLink = new RegExp('^(https?:\\/\\/)?').test(cursor === null || cursor === void 0 ? void 0 : cursor.word);
+        if (isLink) {
+            cursor.link = cursor === null || cursor === void 0 ? void 0 : cursor.word;
+            postLine.render += " shift+t to open link";
         }
         return postLine;
-    },
-    replaceURL: function (text) {
-        var urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.replace(urlRegex, function (url) {
-            var urlSplit = url.split("https://")[1].split("/");
-            var text = urlSplit[2] + "#" + urlSplit[4];
-            linkList[text] = url;
-            return text;
-        });
-    },
-    renderURL: function (text, linkIndexes) {
-        var textSplit = text.split(" ");
-        for (var key in linkIndexes) {
-            for (var index = 0; index < linkIndexes[key].length; index++) {
-                var pos = linkIndexes[key][index];
-                textSplit[pos] = ansi_colors_1.default.blue.underline(textSplit[pos]);
-            }
-        }
-        return textSplit.join(" ");
-    },
-    findURL: function (text) {
-        var linkIndexes = {};
-        var _loop_1 = function (key) {
-            linkIndexes[key] = [];
-            text.split(" ").map(function (word, index) {
-                if (word == key) {
-                    linkIndexes[key].push(index);
-                }
-            });
-        };
-        for (var key in linkList) {
-            _loop_1(key);
-        }
-        return linkIndexes;
     },
     input: function (cursor, _a) {
         var _b;
@@ -147,7 +109,7 @@ var UTIL = {
         inputs.unshift(sequence);
         if (inputs.length > 3)
             inputs.pop();
-        // console.log({ name, ctrl, meta, shift, sequence }, inputs.join(""))
+        console.log({ name: name, ctrl: ctrl, meta: meta, shift: shift, sequence: sequence }, inputs.join(""));
         var isExit = ctrl && name == 'c';
         var isSave = ctrl && name == 's';
         var isLinkOpen = shift && name == 't';
@@ -296,8 +258,7 @@ var UTIL = {
         };
         var prefix = (_c = (_b = prefixes[line.type]) === null || _b === void 0 ? void 0 : _b[line.done]) !== null && _c !== void 0 ? _c : "";
         var value = (_d = line.render) !== null && _d !== void 0 ? _d : line.title;
-        var lineText = UTIL.replaceURL(value);
-        var linkIndexes = UTIL.findURL(lineText);
+        var lineText = value;
         var render = lineText;
         if (isSelected) {
             var lineTextArray = lineText.split("");
@@ -312,7 +273,6 @@ var UTIL = {
         if (line.done) {
             render = ansi_colors_1.default.strikethrough(render);
         }
-        render = UTIL.renderURL(render, linkIndexes);
         if (isSelected) {
             render = ansi_colors_1.default.cyan(render);
             prefix = ansi_colors_1.default.cyan(prefix);

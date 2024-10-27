@@ -67,49 +67,13 @@ var UTIL = {
       title: ">",
       render: c.white("> " + [...inputs].reverse().join("") + " " + cursor.word ?? ""),
     }
-    let selectedLink = "";
-    for (const key in linkList) {
-      if (cursor?.word == key) {
-        selectedLink = linkList[key]
-        cursor.link = selectedLink;
-      }
-    }
-    if (selectedLink) {
-      postLine.render += " shift+t to open link: " + selectedLink
+    // is link
+    const isLink = new RegExp('^(https?:\\/\\/)?').test(cursor?.word);
+    if (isLink) {
+      cursor.link = cursor?.word;
+      postLine.render += " shift+t to open link"
     }
     return postLine;
-  },
-  replaceURL: (text: string) => {
-    var urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, function(url) {
-      let urlSplit = url.split("https://")[1].split("/");
-      let text = urlSplit[2] + "#" + urlSplit[4];
-      linkList[text] = url;
-      return text;
-    });
-  },
-  renderURL: (text, linkIndexes) => {
-    let textSplit = text.split(" ");
-    for (const key in linkIndexes) {
-      for (let index = 0; index < linkIndexes[key].length; index++) {
-        const pos = linkIndexes[key][index];
-        textSplit[pos] = c.blue.underline(textSplit[pos])
-
-      }
-    }
-    return textSplit.join(" ");
-  },
-  findURL: (text) => {
-    const linkIndexes = {}
-    for (const key in linkList) {
-      linkIndexes[key] = [];
-      text.split(" ").map((word, index) => {
-        if (word == key) {
-          linkIndexes[key].push(index);
-        }
-      })
-    }
-    return linkIndexes;
   },
   input: (cursor, { name, ctrl, meta, shift, sequence }) => {
     inputs.unshift(sequence);
@@ -264,8 +228,7 @@ var UTIL = {
     let prefix = prefixes[line.type]?.[line.done] ?? "";
 
     let value = line.render ?? line.title;
-    let lineText = UTIL.replaceURL(value);
-    const linkIndexes = UTIL.findURL(lineText);
+    let lineText = value;
 
     let render: string = lineText;
     if (isSelected) {
@@ -283,7 +246,6 @@ var UTIL = {
     if (line.done) {
       render = c.strikethrough(render);
     }
-    render = UTIL.renderURL(render, linkIndexes);
 
 
     if (isSelected) {

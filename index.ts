@@ -57,22 +57,26 @@ type Cursor = {
   y?: number;
   word?: string;
   link?: string;
+  state?: string;
 }
 let inputs = [];
 let cursor: Cursor = { x: 4, y: lines.length - 1 };
 let isEditMode = false;
 var UTIL = {
   getPostLine: () => {
+
+    const postLineRender = cursor.state ?? [...inputs].reverse().join("") + " " + cursor.word ?? "";
     postLine = {
       title: ">",
-      render: c.white("> " + [...inputs].reverse().join("") + " " + cursor.word ?? ""),
+      render: c.white("> " + postLineRender),
     }
     // is link
-    const isLink = new RegExp('^(https?:\\/\\/)?').test(cursor?.word);
+    const isLink = new RegExp('^(https?:\\/\\/)?((([-a-z0-9]{1,63}\\.)*?[a-z0-9]([-a-z0-9]{0,253}[a-z0-9])?\\.[a-z]{2,63})|((\\d{1,3}\\.){3}\\d{1,3}))(:\\d{1,5})?((\\/|\\?)((%[0-9a-f]{2})|[-\\w\\+\\.\\?\\/@~#&=])*)?$').test(cursor?.word);
     if (isLink) {
       cursor.link = cursor?.word;
       postLine.render += " shift+t to open link"
     }
+
     return postLine;
   },
   input: (cursor, { name, ctrl, meta, shift, sequence }) => {
@@ -303,10 +307,8 @@ var ACTION = {
     lines = lines.concat(data);
   },
   save: () => {
-    postLine = {
-      title: "Saving...",
-      render: c.white("Saving..."),
-    }
+    cursor.state = "saving"
+
     ACTION.list(cursor);
     const fs = require('node:fs');
     const todo = lines.map(line => UTIL.format({ line })).join("\n");
@@ -319,11 +321,9 @@ var ACTION = {
       }
 
       setTimeout(() => {
-        postLine = {
-          title: "",
-        }
+        delete cursor.state
         ACTION.list(cursor);
-      }, 100)
+      }, 500)
     });
   },
   delete: () => {

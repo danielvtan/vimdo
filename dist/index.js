@@ -90,13 +90,14 @@ var cursor = { x: 4, y: lines.length - 1 };
 var isEditMode = false;
 var UTIL = {
     getPostLine: function () {
-        var _a;
+        var _a, _b;
+        var postLineRender = (_b = (_a = cursor.state) !== null && _a !== void 0 ? _a : __spreadArray([], inputs, true).reverse().join("") + " " + cursor.word) !== null && _b !== void 0 ? _b : "";
         postLine = {
             title: ">",
-            render: ansi_colors_1.default.white((_a = "> " + __spreadArray([], inputs, true).reverse().join("") + " " + cursor.word) !== null && _a !== void 0 ? _a : ""),
+            render: ansi_colors_1.default.white("> " + postLineRender),
         };
         // is link
-        var isLink = new RegExp('^(https?:\\/\\/)?').test(cursor === null || cursor === void 0 ? void 0 : cursor.word);
+        var isLink = new RegExp('^(https?:\\/\\/)?((([-a-z0-9]{1,63}\\.)*?[a-z0-9]([-a-z0-9]{0,253}[a-z0-9])?\\.[a-z]{2,63})|((\\d{1,3}\\.){3}\\d{1,3}))(:\\d{1,5})?((\\/|\\?)((%[0-9a-f]{2})|[-\\w\\+\\.\\?\\/@~#&=])*)?$').test(cursor === null || cursor === void 0 ? void 0 : cursor.word);
         if (isLink) {
             cursor.link = cursor === null || cursor === void 0 ? void 0 : cursor.word;
             postLine.render += " shift+t to open link";
@@ -109,7 +110,7 @@ var UTIL = {
         inputs.unshift(sequence);
         if (inputs.length > 3)
             inputs.pop();
-        console.log({ name: name, ctrl: ctrl, meta: meta, shift: shift, sequence: sequence }, inputs.join(""));
+        // console.log({ name, ctrl, meta, shift, sequence }, inputs.join(""))
         var isExit = ctrl && name == 'c';
         var isSave = ctrl && name == 's';
         var isLinkOpen = shift && name == 't';
@@ -342,10 +343,7 @@ var ACTION = {
         });
     }); },
     save: function () {
-        postLine = {
-            title: "Saving...",
-            render: ansi_colors_1.default.white("Saving..."),
-        };
+        cursor.state = "saving";
         ACTION.list(cursor);
         var fs = require('node:fs');
         var todo = lines.map(function (line) { return UTIL.format({ line: line }); }).join("\n");
@@ -357,11 +355,9 @@ var ACTION = {
             else {
             }
             setTimeout(function () {
-                postLine = {
-                    title: "",
-                };
+                delete cursor.state;
                 ACTION.list(cursor);
-            }, 100);
+            }, 500);
         });
     },
     delete: function () {

@@ -31,7 +31,9 @@ vimdo filename.md
 - [x] check if folder has readme.md or todo.md
 - [x] vim: move task up and down (shift+j/k)
 - [x] display markdown list heading as tasks list header
-- [x] link https://github.com/danielvtan/vimdo/issues/1 should display with underscore and redirect using shift+t shortcut
+- [x] link https://github.com/danielvtan/vimdo/issues/1 should display with underline and redirect using shift+t shortcut
+- [ ] git: add git shortcuts
+- [ ] git: use done task as commit message
 - [ ] display markdown title as project name
 - [ ] display filename as file name
 - [ ] if there is no file ask to create file
@@ -44,8 +46,6 @@ vimdo filename.md
 - [ ] move task to other lists (ex. backlog, todo, done)
 - [ ] ability to split task to different lists
 - [ ] ux: shortcut to get all //TODO: in current folder
-- [ ] git: add git:w shortcuts
-- [ ] git: use done task as commit message
 - [ ] vim: move by start of word (w/b)
 - [ ] vim: delete from cursor to end of word (d+w)
 - [ ] sync: to a web app

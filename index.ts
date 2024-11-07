@@ -21,11 +21,13 @@ process.stdin.on('keypress', function(ch, key) {
   // console.log("key", key)
   if (ch && !key) key = { sequence: ch }
 
-  cursor = UTIL.input(cursor, key);
-  cursor.y = Math.min(Math.max(cursor.y, 0), lines.length - 1);
-  cursor.x = Math.min(Math.max(cursor.x, 0), lines[cursor.y].title.length + 1);
+  UTIL.input(cursor, key).then(c => {
+    cursor = c;
+    cursor.y = Math.min(Math.max(cursor.y, 0), lines.length - 1);
+    cursor.x = Math.min(Math.max(cursor.x, 0), lines[cursor.y].title.length + 1);
 
-  ACTION.list(cursor)
+    ACTION.list(cursor)
+  });
 });
 let selectedFile = process.argv[2];
 for (var i = 0; i < process.argv.length; i++) {
@@ -38,14 +40,14 @@ type Line = {
   description?: string;
   type?: string;
 }
-let lines: Line[] = [
-];
+let lines: Line[] = [];
+let gitLines: Line[] = [];
 const preLine: Line = {
   title: "DO", description: "Shortcuts",
   render: c.white(`${c.cyanBright("TODO")} with basic VIM navigation
 ${c.gray(`${c.underline("h/j")} up/down movement \t\t| ${c.underline.cyan("space")} to complete task
 ${c.underline("a/A/i/I")} to enter edit mode \t| ${c.underline("ctrl+c")} to exit
-${c.underline("ctrl+s or :w<return>")} to save
+${c.underline("ctrl+s or :w<return>")} to save \t| ${c.underline.cyan("g")} open git options
 `)}`)
 }
 let postLine: Line = {
@@ -58,6 +60,7 @@ type Cursor = {
   word?: string;
   link?: string;
   state?: string;
+  debug?: string;
 }
 let inputs = [];
 let cursor: Cursor = { x: 4, y: lines.length - 1 };
@@ -77,9 +80,11 @@ var UTIL = {
       postLine.render += " shift+t to open link"
     }
 
+    postLine.render += cursor?.debug ?? ""
+
     return postLine;
   },
-  input: (cursor, { name, ctrl, meta, shift, sequence }) => {
+  input: async (cursor, { name, ctrl, meta, shift, sequence }) => {
     inputs.unshift(sequence);
 
     if (inputs.length > 3) inputs.pop();
@@ -134,6 +139,31 @@ var UTIL = {
       input = "link_open"
     }
     switch (input) {
+      case "g":
+        if (gitLines.length > 0) {
+          gitLines = [];
+          lines = [];
+          cursor.state = ""
+          await ACTION.read();
+          ACTION.list(cursor);
+          return cursor;
+        }
+        var start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
+        require('child_process').exec("git branch --sort=-committerdate", (err, stdout, stderr) => {
+          const branches = stdout.split("\n").filter(v => v.length != 0);
+          // cursor.debug = JSON.stringify(branches)
+
+          cursor.state = "git";
+
+          gitLines = branches.map(branch => {
+            return {
+              title: branch.trim(),
+            }
+          })
+          lines = gitLines;
+          ACTION.list(cursor);
+        });
+        return cursor;
       case "x":
 
         const titleArray = lines[cursor.y].title.split("");
@@ -155,6 +185,27 @@ var UTIL = {
         ACTION.edit();
         return cursor;
       case " ":
+        if (cursor.state == "git") {
+          var start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
+          require('child_process').exec("git checkout " + cursor.word, () => {
+            require('child_process').exec("git branch --sort=-committerdate", (err, stdout, stderr) => {
+              const branches = stdout.split("\n").filter(v => v.length != 0);
+              // cursor.debug = JSON.stringify(branches)
+
+              cursor.state = "git";
+
+              gitLines = branches.map(branch => {
+                return {
+                  title: branch.trim(),
+                }
+              })
+              lines = gitLines;
+              ACTION.list(cursor);
+            });
+
+          })
+          return cursor;
+        }
         lines[cursor.y].done = !Boolean(lines[cursor.y].done);
         return cursor;
       case "\r":
@@ -341,6 +392,7 @@ var ACTION = {
 
     process.stdout.write(
       UTIL.format({ line: preLine }) + "\n" +
+
       UTIL.format({ line: { render: c.cyan(listHeader) } }) + "\n" +
       lines.map((line, index) => {
         return UTIL.format({

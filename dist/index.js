@@ -68,19 +68,22 @@ process.stdin.on('keypress', function (ch, key) {
     // console.log("key", key)
     if (ch && !key)
         key = { sequence: ch };
-    cursor = UTIL.input(cursor, key);
-    cursor.y = Math.min(Math.max(cursor.y, 0), lines.length - 1);
-    cursor.x = Math.min(Math.max(cursor.x, 0), lines[cursor.y].title.length + 1);
-    ACTION.list(cursor);
+    UTIL.input(cursor, key).then(function (c) {
+        cursor = c;
+        cursor.y = Math.min(Math.max(cursor.y, 0), lines.length - 1);
+        cursor.x = Math.min(Math.max(cursor.x, 0), lines[cursor.y].title.length + 1);
+        ACTION.list(cursor);
+    });
 });
 var selectedFile = process.argv[2];
 for (var i = 0; i < process.argv.length; i++) {
     console.log(process.argv[i]);
 }
 var lines = [];
+var gitLines = [];
 var preLine = {
     title: "DO", description: "Shortcuts",
-    render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("TODO"), " with basic VIM navigation\n").concat(ansi_colors_1.default.gray("".concat(ansi_colors_1.default.underline("h/j"), " up/down movement \t\t| ").concat(ansi_colors_1.default.underline.cyan("space"), " to complete task\n").concat(ansi_colors_1.default.underline("a/A/i/I"), " to enter edit mode \t| ").concat(ansi_colors_1.default.underline("ctrl+c"), " to exit\n").concat(ansi_colors_1.default.underline("ctrl+s or :w<return>"), " to save\n"))))
+    render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("TODO"), " with basic VIM navigation\n").concat(ansi_colors_1.default.gray("".concat(ansi_colors_1.default.underline("h/j"), " up/down movement \t\t| ").concat(ansi_colors_1.default.underline.cyan("space"), " to complete task\n").concat(ansi_colors_1.default.underline("a/A/i/I"), " to enter edit mode \t| ").concat(ansi_colors_1.default.underline("ctrl+c"), " to exit\n").concat(ansi_colors_1.default.underline("ctrl+s or :w<return>"), " to save \t| ").concat(ansi_colors_1.default.underline.cyan("g"), " open git options\n"))))
 };
 var postLine = {
     title: ""
@@ -90,7 +93,7 @@ var cursor = { x: 4, y: lines.length - 1 };
 var isEditMode = false;
 var UTIL = {
     getPostLine: function () {
-        var _a, _b;
+        var _a, _b, _c;
         var postLineRender = (_b = (_a = cursor.state) !== null && _a !== void 0 ? _a : __spreadArray([], inputs, true).reverse().join("") + " " + cursor.word) !== null && _b !== void 0 ? _b : "";
         postLine = {
             title: ">",
@@ -102,147 +105,218 @@ var UTIL = {
             cursor.link = cursor === null || cursor === void 0 ? void 0 : cursor.word;
             postLine.render += " shift+t to open link";
         }
+        postLine.render += (_c = cursor === null || cursor === void 0 ? void 0 : cursor.debug) !== null && _c !== void 0 ? _c : "";
         return postLine;
     },
-    input: function (cursor, _a) {
-        var _b;
-        var name = _a.name, ctrl = _a.ctrl, meta = _a.meta, shift = _a.shift, sequence = _a.sequence;
-        inputs.unshift(sequence);
-        if (inputs.length > 3)
-            inputs.pop();
-        // console.log({ name, ctrl, meta, shift, sequence }, inputs.join(""))
-        var isExit = ctrl && name == 'c';
-        var isSave = ctrl && name == 's';
-        var isLinkOpen = shift && name == 't';
-        var isDelete = inputs.join("").startsWith("dd");
-        var isTryingToSave = inputs.join("").startsWith("\rw:");
-        if (isEditMode) {
-            if (isExit || isSave) {
-                // console.log("exit")
-                lines[cursor.y].render = lines[cursor.y].title;
-                // cursor.x = 0
-                isEditMode = false;
-                return cursor;
-            }
-            if (sequence == "\r") {
-                lines[cursor.y].render = lines[cursor.y].title;
-                cursor.y += 1;
-                ACTION.create(cursor.y);
-                cursor.x = lines[cursor.y].title.length + 1;
-                lines[cursor.y].render = lines[cursor.y].title;
-                return cursor;
-            }
-            var titleArray = lines[cursor.y].title.split("");
-            if (name == "backspace") {
-                titleArray.splice(Math.max(cursor.x - 1, 0), 1);
-                cursor.x -= 1;
-            }
-            else {
-                titleArray.splice(cursor.x, 0, sequence);
-                if (titleArray.length == 1)
+    input: function (cursor_1, _a) { return __awaiter(void 0, [cursor_1, _a], void 0, function (cursor, _b) {
+        var isExit, isSave, isLinkOpen, isDelete, isTryingToSave, titleArray, input, _c, start, titleArray, start, currentLine, targetLine, currentLine, targetLine, start;
+        var _d;
+        var name = _b.name, ctrl = _b.ctrl, meta = _b.meta, shift = _b.shift, sequence = _b.sequence;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
+                case 0:
+                    inputs.unshift(sequence);
+                    if (inputs.length > 3)
+                        inputs.pop();
+                    isExit = ctrl && name == 'c';
+                    isSave = ctrl && name == 's';
+                    isLinkOpen = shift && name == 't';
+                    isDelete = inputs.join("").startsWith("dd");
+                    isTryingToSave = inputs.join("").startsWith("\rw:");
+                    if (isEditMode) {
+                        if (isExit || isSave) {
+                            // console.log("exit")
+                            lines[cursor.y].render = lines[cursor.y].title;
+                            // cursor.x = 0
+                            isEditMode = false;
+                            return [2 /*return*/, cursor];
+                        }
+                        if (sequence == "\r") {
+                            lines[cursor.y].render = lines[cursor.y].title;
+                            cursor.y += 1;
+                            ACTION.create(cursor.y);
+                            cursor.x = lines[cursor.y].title.length + 1;
+                            lines[cursor.y].render = lines[cursor.y].title;
+                            return [2 /*return*/, cursor];
+                        }
+                        titleArray = lines[cursor.y].title.split("");
+                        if (name == "backspace") {
+                            titleArray.splice(Math.max(cursor.x - 1, 0), 1);
+                            cursor.x -= 1;
+                        }
+                        else {
+                            titleArray.splice(cursor.x, 0, sequence);
+                            if (titleArray.length == 1)
+                                cursor.x += 1;
+                            cursor.x += 1;
+                        }
+                        lines[cursor.y].title = titleArray.join("");
+                        lines[cursor.y].render = lines[cursor.y].title;
+                        return [2 /*return*/, cursor];
+                    }
+                    input = sequence;
+                    if (isExit) {
+                        input = "exit";
+                    }
+                    if (isSave) {
+                        input = "save";
+                    }
+                    if (isDelete) {
+                        inputs = [];
+                        input = "delete";
+                    }
+                    if (isLinkOpen) {
+                        input = "link_open";
+                    }
+                    _c = input;
+                    switch (_c) {
+                        case "g": return [3 /*break*/, 1];
+                        case "x": return [3 /*break*/, 4];
+                        case "I": return [3 /*break*/, 5];
+                        case "i": return [3 /*break*/, 6];
+                        case "A": return [3 /*break*/, 7];
+                        case "a": return [3 /*break*/, 8];
+                        case " ": return [3 /*break*/, 9];
+                        case "\r": return [3 /*break*/, 10];
+                        case "h": return [3 /*break*/, 11];
+                        case "left": return [3 /*break*/, 11];
+                        case "l": return [3 /*break*/, 12];
+                        case "right": return [3 /*break*/, 12];
+                        case "j": return [3 /*break*/, 13];
+                        case "down": return [3 /*break*/, 13];
+                        case "k": return [3 /*break*/, 14];
+                        case "up": return [3 /*break*/, 14];
+                        case "J": return [3 /*break*/, 15];
+                        case "K": return [3 /*break*/, 16];
+                        case "link_open": return [3 /*break*/, 17];
+                        case "delete": return [3 /*break*/, 18];
+                        case "save": return [3 /*break*/, 19];
+                        case "exit": return [3 /*break*/, 20];
+                    }
+                    return [3 /*break*/, 21];
+                case 1:
+                    if (!(gitLines.length > 0)) return [3 /*break*/, 3];
+                    gitLines = [];
+                    lines = [];
+                    cursor.state = "";
+                    return [4 /*yield*/, ACTION.read()];
+                case 2:
+                    _e.sent();
+                    ACTION.list(cursor);
+                    return [2 /*return*/, cursor];
+                case 3:
+                    start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
+                    require('child_process').exec("git branch --sort=-committerdate", function (err, stdout, stderr) {
+                        var branches = stdout.split("\n").filter(function (v) { return v.length != 0; });
+                        cursor.debug = JSON.stringify(branches);
+                        cursor.state = "git";
+                        gitLines = branches.map(function (branch) {
+                            return {
+                                title: branch.trim(),
+                            };
+                        });
+                        lines = gitLines;
+                        ACTION.list(cursor);
+                    });
+                    return [2 /*return*/, cursor];
+                case 4:
+                    titleArray = lines[cursor.y].title.split("");
+                    titleArray.splice(Math.max(cursor.x, 0), 1);
+                    // cursor.x -= 1;
+                    lines[cursor.y].title = titleArray.join("");
+                    lines[cursor.y].render = lines[cursor.y].title;
+                    return [2 /*return*/, cursor];
+                case 5:
+                    cursor.x = 1;
+                    _e.label = 6;
+                case 6:
+                    // cursor.x -= 1;
+                    ACTION.edit();
+                    return [2 /*return*/, cursor];
+                case 7:
+                    cursor.x = ((_d = lines[cursor.y]) === null || _d === void 0 ? void 0 : _d.title.length) + 1;
+                    _e.label = 8;
+                case 8:
                     cursor.x += 1;
-                cursor.x += 1;
-            }
-            lines[cursor.y].title = titleArray.join("");
-            lines[cursor.y].render = lines[cursor.y].title;
-            return cursor;
-        }
-        var input = sequence;
-        if (isExit) {
-            input = "exit";
-        }
-        if (isSave) {
-            input = "save";
-        }
-        if (isDelete) {
-            inputs = [];
-            input = "delete";
-        }
-        if (isLinkOpen) {
-            input = "link_open";
-        }
-        switch (input) {
-            case "x":
-                var titleArray = lines[cursor.y].title.split("");
-                titleArray.splice(Math.max(cursor.x, 0), 1);
-                // cursor.x -= 1;
-                lines[cursor.y].title = titleArray.join("");
-                lines[cursor.y].render = lines[cursor.y].title;
-                return cursor;
-            case "I":
-                cursor.x = 1;
-            case "i":
-                // cursor.x -= 1;
-                ACTION.edit();
-                return cursor;
-            case "A":
-                cursor.x = ((_b = lines[cursor.y]) === null || _b === void 0 ? void 0 : _b.title.length) + 1;
-            case "a":
-                cursor.x += 1;
-                ACTION.edit();
-                return cursor;
-            case " ":
-                lines[cursor.y].done = !Boolean(lines[cursor.y].done);
-                return cursor;
-            case "\r":
-                if (isTryingToSave) {
-                    inputs = [];
+                    ACTION.edit();
+                    return [2 /*return*/, cursor];
+                case 9:
+                    if (cursor.state == "git") {
+                        start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
+                        require('child_process').exec("git checkout " + cursor.word, function () {
+                            require('child_process').exec("git branch --sort=-committerdate", function (err, stdout, stderr) {
+                                var branches = stdout.split("\n").filter(function (v) { return v.length != 0; });
+                                // cursor.debug = JSON.stringify(branches)
+                                cursor.state = "git";
+                                gitLines = branches.map(function (branch) {
+                                    return {
+                                        title: branch.trim(),
+                                    };
+                                });
+                                lines = gitLines;
+                                ACTION.list(cursor);
+                            });
+                        });
+                        return [2 /*return*/, cursor];
+                    }
+                    lines[cursor.y].done = !Boolean(lines[cursor.y].done);
+                    return [2 /*return*/, cursor];
+                case 10:
+                    if (isTryingToSave) {
+                        inputs = [];
+                        ACTION.save();
+                        return [2 /*return*/, cursor];
+                    }
+                    ACTION.create();
+                    ACTION.edit();
+                    cursor.y = lines.length - 1;
+                    return [2 /*return*/, cursor];
+                case 11:
+                    cursor.x -= 1;
+                    return [2 /*return*/, cursor];
+                case 12:
+                    cursor.x += 1;
+                    return [2 /*return*/, cursor];
+                case 13:
+                    cursor.y += 1;
+                    return [2 /*return*/, cursor];
+                case 14:
+                    cursor.y -= 1;
+                    return [2 /*return*/, cursor];
+                case 15:
+                    currentLine = lines[cursor.y];
+                    targetLine = lines[cursor.y + 1];
+                    lines[cursor.y + 1] = currentLine;
+                    lines[cursor.y] = targetLine;
+                    cursor.y += 1;
+                    return [2 /*return*/, cursor];
+                case 16:
+                    currentLine = lines[cursor.y];
+                    targetLine = lines[cursor.y - 1];
+                    lines[cursor.y - 1] = currentLine;
+                    lines[cursor.y] = targetLine;
+                    cursor.y -= 1;
+                    return [2 /*return*/, cursor];
+                case 17:
+                    start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
+                    require('child_process').exec(start + ' ' + (cursor === null || cursor === void 0 ? void 0 : cursor.link));
+                    return [2 /*return*/, cursor];
+                case 18:
+                    ACTION.delete();
+                    return [2 /*return*/, cursor];
+                case 19:
+                    lines[cursor.y].render = lines[cursor.y].title;
+                    isEditMode = false;
                     ACTION.save();
-                    return cursor;
-                }
-                ACTION.create();
-                ACTION.edit();
-                cursor.y = lines.length - 1;
-                return cursor;
-            case "h":
-            case "left":
-                cursor.x -= 1;
-                return cursor;
-            case "l":
-            case "right":
-                cursor.x += 1;
-                return cursor;
-            case "j":
-            case "down":
-                cursor.y += 1;
-                return cursor;
-            case "k":
-            case "up":
-                cursor.y -= 1;
-                return cursor;
-            case "J":
-                var currentLine = lines[cursor.y];
-                var targetLine = lines[cursor.y + 1];
-                lines[cursor.y + 1] = currentLine;
-                lines[cursor.y] = targetLine;
-                cursor.y += 1;
-                return cursor;
-            case "K":
-                var currentLine = lines[cursor.y];
-                var targetLine = lines[cursor.y - 1];
-                lines[cursor.y - 1] = currentLine;
-                lines[cursor.y] = targetLine;
-                cursor.y -= 1;
-                return cursor;
-            case "link_open":
-                var start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
-                require('child_process').exec(start + ' ' + (cursor === null || cursor === void 0 ? void 0 : cursor.link));
-                return cursor;
-            case "delete":
-                ACTION.delete();
-                return cursor;
-            case "save":
-                lines[cursor.y].render = lines[cursor.y].title;
-                isEditMode = false;
-                ACTION.save();
-                return cursor;
-            case "exit":
-                process.stdout.write("\u001B[?25h");
-                process.exit();
-            default:
-                return cursor;
-        }
-    },
+                    return [2 /*return*/, cursor];
+                case 20:
+                    process.stdout.write("\u001B[?25h");
+                    process.exit();
+                    _e.label = 21;
+                case 21: return [2 /*return*/, cursor];
+            }
+        });
+    }); },
     format: function (_a) {
         var _b, _c, _d, _e;
         var line = _a.line, index = _a.index, _f = _a.cursor, cursor = _f === void 0 ? { x: 0, y: 0 } : _f;

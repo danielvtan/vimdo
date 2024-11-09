@@ -80,7 +80,7 @@ var UTIL = {
       postLine.render += " shift+t to open link"
     }
 
-    postLine.render += cursor?.debug ?? ""
+    postLine.render += cursor?.debug ? " " + c.red(cursor.debug) : "";
 
     return postLine;
   },
@@ -187,10 +187,17 @@ var UTIL = {
       case " ":
         if (cursor.state == "git") {
           var start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
-          require('child_process').exec("git checkout " + cursor.word, () => {
+          require('child_process').exec("git checkout " + cursor.word, (err, stdout, stderr) => {
+
+            let errorMessage
+            if (stderr.includes("error: Your local changes")) {
+              errorMessage = "Please commit local changes first";
+              cursor.debug = errorMessage
+              return ACTION.list(cursor);
+            }
             require('child_process').exec("git branch --sort=-committerdate", (err, stdout, stderr) => {
               const branches = stdout.split("\n").filter(v => v.length != 0);
-              // cursor.debug = JSON.stringify(branches)
+              cursor.debug = errorMessage
 
               cursor.state = "git";
 

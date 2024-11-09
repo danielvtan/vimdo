@@ -93,7 +93,7 @@ var cursor = { x: 4, y: lines.length - 1 };
 var isEditMode = false;
 var UTIL = {
     getPostLine: function () {
-        var _a, _b, _c;
+        var _a, _b;
         var postLineRender = (_b = (_a = cursor.state) !== null && _a !== void 0 ? _a : __spreadArray([], inputs, true).reverse().join("") + " " + cursor.word) !== null && _b !== void 0 ? _b : "";
         postLine = {
             title: ">",
@@ -105,7 +105,7 @@ var UTIL = {
             cursor.link = cursor === null || cursor === void 0 ? void 0 : cursor.word;
             postLine.render += " shift+t to open link";
         }
-        postLine.render += (_c = cursor === null || cursor === void 0 ? void 0 : cursor.debug) !== null && _c !== void 0 ? _c : "";
+        postLine.render += (cursor === null || cursor === void 0 ? void 0 : cursor.debug) ? " " + ansi_colors_1.default.red(cursor.debug) : "";
         return postLine;
     },
     input: function (cursor_1, _a) { return __awaiter(void 0, [cursor_1, _a], void 0, function (cursor, _b) {
@@ -208,7 +208,7 @@ var UTIL = {
                     start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
                     require('child_process').exec("git branch --sort=-committerdate", function (err, stdout, stderr) {
                         var branches = stdout.split("\n").filter(function (v) { return v.length != 0; });
-                        cursor.debug = JSON.stringify(branches);
+                        // cursor.debug = JSON.stringify(branches)
                         cursor.state = "git";
                         gitLines = branches.map(function (branch) {
                             return {
@@ -243,10 +243,16 @@ var UTIL = {
                 case 9:
                     if (cursor.state == "git") {
                         start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
-                        require('child_process').exec("git checkout " + cursor.word, function () {
+                        require('child_process').exec("git checkout " + cursor.word, function (err, stdout, stderr) {
+                            var errorMessage;
+                            if (stderr.includes("error: Your local changes")) {
+                                errorMessage = "Please commit local changes first";
+                                cursor.debug = errorMessage;
+                                return ACTION.list(cursor);
+                            }
                             require('child_process').exec("git branch --sort=-committerdate", function (err, stdout, stderr) {
                                 var branches = stdout.split("\n").filter(function (v) { return v.length != 0; });
-                                // cursor.debug = JSON.stringify(branches)
+                                cursor.debug = errorMessage;
                                 cursor.state = "git";
                                 gitLines = branches.map(function (branch) {
                                     return {

@@ -48,6 +48,7 @@ const preLine: Line = {
 ${c.gray(`${c.underline("h/j")} up/down movement \t\t| ${c.underline.cyan("space")} to complete task
 ${c.underline("a/A/i/I")} to enter edit mode \t| ${c.underline("ctrl+c")} to exit
 ${c.underline("ctrl+s or :w<return>")} to save \t| ${c.underline.cyan("g")} open git options
+${c.underline.cyan("c")} to 'add .' and 'commit -m' using task as msg
 `)}`)
 }
 let postLine: Line = {
@@ -140,7 +141,7 @@ var UTIL = {
     }
     switch (input) {
       case "g":
-        if (gitLines.length > 0) {
+        if (cursor.state == "git") {
           gitLines = [];
           lines = [];
           cursor.state = ""
@@ -162,6 +163,14 @@ var UTIL = {
           })
           lines = gitLines;
           ACTION.list(cursor);
+        });
+        return cursor;
+      case "c":
+        if (cursor.state == "git") return cursor;
+        require('child_process').exec("git add .", (err, stdout, stderr) => {
+          require('child_process').exec("git commit -m '" + lines[cursor.y].title + "'", (err, stdout, stderr) => {
+            cursor.debug = "git commit -m '" + lines[cursor.y].title + "'";
+          });
         });
         return cursor;
       case "x":

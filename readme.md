@@ -36,7 +36,7 @@ vimdo filename.md
 - [x] git: add shortcut to checkout
 - [x] git: add shortcut to commit using task
 - [x] git: use done task as commit message
-- [ ] git: save file first before add/commit event
+- [x] git: save file first before add/commit event
 - [ ] change help nav to git when in git mode
 - [ ] display markdown title as project name
 - [ ] display filename as file name

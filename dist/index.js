@@ -225,7 +225,7 @@ var UTIL = {
                     if (cursor.state == "git")
                         return [2 /*return*/, cursor];
                     line_1 = lines[cursor.y];
-                    line_1.done = !line_1.done;
+                    lines[cursor.y].done = !Boolean(lines[cursor.y].done);
                     ACTION.save(function () {
                         require('child_process').exec("git add .", function (err, stdout, stderr) {
                             require('child_process').exec("git commit -m '" + line_1.title + "'", function (err, stdout, stderr) {

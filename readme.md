@@ -32,8 +32,11 @@ vimdo filename.md
 - [x] vim: move task up and down (shift+j/k)
 - [x] display markdown list heading as tasks list header
 - [x] link https://github.com/danielvtan/vimdo/issues/1 should display with underline and redirect using shift+t shortcut
-- [ ] git: add git shortcuts
+- [x] git: add git shortcuts
+- [ ] git: add shortcut to checkout
+- [ ] git: add shortcut to commit using task
 - [ ] git: use done task as commit message
+- [ ] change help nav to git when in git mode
 - [ ] display markdown title as project name
 - [ ] display filename as file name
 - [ ] if there is no file ask to create file

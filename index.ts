@@ -170,7 +170,7 @@ var UTIL = {
       case "c":
         if (cursor.state == "git") return cursor;
         const line = lines[cursor.y]
-        line.done = !line.done
+        lines[cursor.y].done = !Boolean(lines[cursor.y].done);
         ACTION.save(() => {
           require('child_process').exec("git add .", (err, stdout, stderr) => {
             require('child_process').exec("git commit -m '" + line.title + "'", (err, stdout, stderr) => {

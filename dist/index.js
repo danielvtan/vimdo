@@ -81,9 +81,14 @@ for (var i = 0; i < process.argv.length; i++) {
 }
 var lines = [];
 var gitLines = [];
-var preLine = {
+var tipStyle = ansi_colors_1.default.underline.cyan;
+var defaultPreLine = {
     title: "DO", description: "Shortcuts",
-    render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("TODO"), " with basic VIM navigation\n").concat(ansi_colors_1.default.gray("".concat(ansi_colors_1.default.underline("h/j"), " up/down movement \t\t| ").concat(ansi_colors_1.default.underline.cyan("space"), " to complete task\n").concat(ansi_colors_1.default.underline("a/A/i/I"), " to enter edit mode \t| ").concat(ansi_colors_1.default.underline("ctrl+c"), " to exit\n").concat(ansi_colors_1.default.underline("ctrl+s or :w<return>"), " to save \t| ").concat(ansi_colors_1.default.underline.cyan("g"), " open git options\n").concat(ansi_colors_1.default.underline.cyan("c"), " to 'add .' and 'commit -m' using task as msg\n"))))
+    render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("TODO"), " with basic VIM navigation\n").concat(tipStyle("ctrl+s or :w<return>"), " to save \t ").concat(tipStyle("g"), " to switch mode   \n").concat(ansi_colors_1.default.gray("".concat(tipStyle("h/j"), " up/down movement \t\t ").concat(tipStyle("a/A/i/I"), " to enter edit mode\n").concat(tipStyle("ctrl+c"), " to exit \t\t\t ").concat(tipStyle("space"), " to set to done \n").concat(tipStyle("c"), " to 'add .' and 'commit -m' using task as msg\n"))))
+};
+var gitPreLine = {
+    title: "DO", description: "Shortcuts",
+    render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("GIT"), " with basic VIM navigation\n").concat(tipStyle("ctrl+s or :w<return>"), " to save \t ").concat(tipStyle("g"), " to switch mode   \n").concat(ansi_colors_1.default.gray("".concat(tipStyle("h/j"), " up/down movement \t\t ").concat(tipStyle("a/A/i/I"), " to enter edit mode\n").concat(tipStyle("ctrl+c"), " to exit \t\t\t ").concat(tipStyle("space"), " to checkout branch     \n"))))
 };
 var postLine = {
     title: ""
@@ -470,13 +475,10 @@ var ACTION = {
     cancel: function () {
     },
     list: function (cursor) { return __awaiter(void 0, void 0, void 0, function () {
+        var preLine;
         return __generator(this, function (_a) {
             console.clear();
-            // process.stdout.write('\x1Bc')
-            // for (let index = 0; index < lines.length + 1; index++) {
-            //   process.stdout.readableDidRead(0, -1);
-            //   process.stdout.clearLine();
-            // }
+            preLine = cursor.state == "git" ? gitPreLine : defaultPreLine;
             process.stdout.write(UTIL.format({ line: preLine }) + "\n" +
                 UTIL.format({ line: { render: ansi_colors_1.default.cyan(listHeader) } }) + "\n" +
                 lines.map(function (line, index) {

@@ -168,8 +168,10 @@ var UTIL = {
       case "c":
         if (cursor.state == "git") return cursor;
         require('child_process').exec("git add .", (err, stdout, stderr) => {
-          require('child_process').exec("git commit -m '" + lines[cursor.y].title + "'", (err, stdout, stderr) => {
-            cursor.debug = "git commit -m '" + lines[cursor.y].title + "'";
+          const line = lines[cursor.y]
+          require('child_process').exec("git commit -m '" + line.title + "'", (err, stdout, stderr) => {
+            cursor.debug = "git commit -m '" + line.title + "'";
+            line.done = !line.done
             ACTION.list(cursor);
           });
         });

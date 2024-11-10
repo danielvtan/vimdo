@@ -109,7 +109,7 @@ var UTIL = {
         return postLine;
     },
     input: function (cursor_1, _a) { return __awaiter(void 0, [cursor_1, _a], void 0, function (cursor, _b) {
-        var isExit, isSave, isLinkOpen, isDelete, isTryingToSave, titleArray, input, _c, start, titleArray, start, currentLine, targetLine, currentLine, targetLine, start;
+        var isExit, isSave, isLinkOpen, isDelete, isTryingToSave, titleArray, input, _c, start, line_1, titleArray, start, currentLine, targetLine, currentLine, targetLine, start;
         var _d;
         var name = _b.name, ctrl = _b.ctrl, meta = _b.meta, shift = _b.shift, sequence = _b.sequence;
         return __generator(this, function (_e) {
@@ -224,12 +224,14 @@ var UTIL = {
                 case 4:
                     if (cursor.state == "git")
                         return [2 /*return*/, cursor];
-                    require('child_process').exec("git add .", function (err, stdout, stderr) {
-                        var line = lines[cursor.y];
-                        require('child_process').exec("git commit -m '" + line.title + "'", function (err, stdout, stderr) {
-                            cursor.debug = "git commit -m '" + line.title + "'";
-                            line.done = !line.done;
-                            ACTION.list(cursor);
+                    line_1 = lines[cursor.y];
+                    line_1.done = !line_1.done;
+                    ACTION.save(function () {
+                        require('child_process').exec("git add .", function (err, stdout, stderr) {
+                            require('child_process').exec("git commit -m '" + line_1.title + "'", function (err, stdout, stderr) {
+                                cursor.debug = "git commit -m '" + line_1.title + "'";
+                                ACTION.list(cursor);
+                            });
                         });
                     });
                     return [2 /*return*/, cursor];
@@ -436,7 +438,8 @@ var ACTION = {
             }
         });
     }); },
-    save: function () {
+    save: function (onSaveCallback) {
+        if (onSaveCallback === void 0) { onSaveCallback = undefined; }
         cursor.state = "saving";
         ACTION.list(cursor);
         var fs = require('node:fs');
@@ -448,6 +451,7 @@ var ACTION = {
             }
             else {
             }
+            onSaveCallback && onSaveCallback();
             setTimeout(function () {
                 delete cursor.state;
                 ACTION.list(cursor);

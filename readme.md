@@ -34,8 +34,9 @@ vimdo filename.md
 - [x] link https://github.com/danielvtan/vimdo/issues/1 should display with underline and redirect using shift+t shortcut
 - [x] git: add git shortcuts
 - [x] git: add shortcut to checkout
-- [ ] git: add shortcut to commit using task
-- [ ] git: use done task as commit message
+- [x] git: add shortcut to commit using task
+- [x] git: use done task as commit message
+- [x] git: save file first before add/commit event
 - [ ] change help nav to git when in git mode
 - [ ] display markdown title as project name
 - [ ] display filename as file name

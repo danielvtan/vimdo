@@ -116,6 +116,7 @@ var UTIL = {
             switch (_e.label) {
                 case 0:
                     inputs.unshift(sequence);
+                    cursor.debug = "";
                     if (inputs.length > 3)
                         inputs.pop();
                     isExit = ctrl && name == 'c';

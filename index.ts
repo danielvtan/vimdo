@@ -88,6 +88,8 @@ var UTIL = {
   input: async (cursor, { name, ctrl, meta, shift, sequence }) => {
     inputs.unshift(sequence);
 
+    cursor.debug = "";
+
     if (inputs.length > 3) inputs.pop();
 
     // console.log({ name, ctrl, meta, shift, sequence }, inputs.join(""))

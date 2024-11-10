@@ -147,6 +147,7 @@ var UTIL = {
           gitLines = [];
           lines = [];
           cursor.state = ""
+          cursor.y = 0;
           await ACTION.read();
           ACTION.list(cursor);
           return cursor;
@@ -157,6 +158,7 @@ var UTIL = {
           // cursor.debug = JSON.stringify(branches)
 
           cursor.state = "git";
+          cursor.y = 0;
 
           gitLines = branches.map(branch => {
             return {
@@ -169,6 +171,10 @@ var UTIL = {
         return cursor;
       case "c":
         if (cursor.state == "git") return cursor;
+        if (lines[cursor.y].done) {
+          cursor.debug = "Auto commit only works on tasks not yet done"
+          return cursor;
+        }
         const line = lines[cursor.y]
         lines[cursor.y].done = !Boolean(lines[cursor.y].done);
         ACTION.save(() => {

@@ -201,6 +201,7 @@ var UTIL = {
                     gitLines = [];
                     lines = [];
                     cursor.state = "";
+                    cursor.y = 0;
                     return [4 /*yield*/, ACTION.read()];
                 case 2:
                     _e.sent();
@@ -212,6 +213,7 @@ var UTIL = {
                         var branches = stdout.split("\n").filter(function (v) { return v.length != 0; });
                         // cursor.debug = JSON.stringify(branches)
                         cursor.state = "git";
+                        cursor.y = 0;
                         gitLines = branches.map(function (branch) {
                             return {
                                 title: branch.trim(),
@@ -224,6 +226,10 @@ var UTIL = {
                 case 4:
                     if (cursor.state == "git")
                         return [2 /*return*/, cursor];
+                    if (lines[cursor.y].done) {
+                        cursor.debug = "Auto commit only works on tasks not yet done";
+                        return [2 /*return*/, cursor];
+                    }
                     line_1 = lines[cursor.y];
                     lines[cursor.y].done = !Boolean(lines[cursor.y].done);
                     ACTION.save(function () {

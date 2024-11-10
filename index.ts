@@ -170,6 +170,7 @@ var UTIL = {
         require('child_process').exec("git add .", (err, stdout, stderr) => {
           require('child_process').exec("git commit -m '" + lines[cursor.y].title + "'", (err, stdout, stderr) => {
             cursor.debug = "git commit -m '" + lines[cursor.y].title + "'";
+            ACTION.list(cursor);
           });
         });
         return cursor;

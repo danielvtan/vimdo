@@ -226,6 +226,7 @@ var UTIL = {
                     require('child_process').exec("git add .", function (err, stdout, stderr) {
                         require('child_process').exec("git commit -m '" + lines[cursor.y].title + "'", function (err, stdout, stderr) {
                             cursor.debug = "git commit -m '" + lines[cursor.y].title + "'";
+                            ACTION.list(cursor);
                         });
                     });
                     return [2 /*return*/, cursor];

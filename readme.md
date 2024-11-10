@@ -38,7 +38,8 @@ vimdo filename.md
 - [x] git: use done task as commit message
 - [x] git: save file first before add/commit event
 - [x] set cursor.y pos to 0 when mode switching
-- [ ] change help nav to git when in git mode
+- [x] change help nav to git when in git mode
+- [ ] git: set p as shortcut to push code in current branch
 - [ ] display markdown title as project name
 - [ ] display filename as file name
 - [ ] if there is no file ask to create file

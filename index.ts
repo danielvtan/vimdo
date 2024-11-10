@@ -42,15 +42,28 @@ type Line = {
 }
 let lines: Line[] = [];
 let gitLines: Line[] = [];
-const preLine: Line = {
+const tipStyle = c.underline.cyan;
+const defaultPreLine: Line = {
   title: "DO", description: "Shortcuts",
   render: c.white(`${c.cyanBright("TODO")} with basic VIM navigation
-${c.gray(`${c.underline("h/j")} up/down movement \t\t| ${c.underline.cyan("space")} to complete task
-${c.underline("a/A/i/I")} to enter edit mode \t| ${c.underline("ctrl+c")} to exit
-${c.underline("ctrl+s or :w<return>")} to save \t| ${c.underline.cyan("g")} open git options
-${c.underline.cyan("c")} to 'add .' and 'commit -m' using task as msg
-`)}`)
+${tipStyle("ctrl+s or :w<return>")} to save \t ${tipStyle("g")} to switch mode   
+${c.gray(`${tipStyle("h/j")} up/down movement \t\t ${tipStyle("a/A/i/I")} to enter edit mode
+${tipStyle("ctrl+c")} to exit \t\t\t ${tipStyle("space")} to set to done 
+${tipStyle("c")} to 'add .' and 'commit -m' using task as msg
+`)
+    }`)
 }
+
+const gitPreLine: Line = {
+  title: "DO", description: "Shortcuts",
+  render: c.white(`${c.cyanBright("GIT")} with basic VIM navigation
+${tipStyle("ctrl+s or :w<return>")} to save \t ${tipStyle("g")} to switch mode   
+${c.gray(`${tipStyle("h/j")} up/down movement \t\t ${tipStyle("a/A/i/I")} to enter edit mode
+${tipStyle("ctrl+c")} to exit \t\t\t ${tipStyle("space")} to checkout branch     
+`)
+    }`)
+}
+
 let postLine: Line = {
   title: ""
 }
@@ -421,6 +434,7 @@ var ACTION = {
     //   process.stdout.clearLine();
     // }
 
+    const preLine: Line = cursor.state == "git" ? gitPreLine : defaultPreLine;
     process.stdout.write(
       UTIL.format({ line: preLine }) + "\n" +
 

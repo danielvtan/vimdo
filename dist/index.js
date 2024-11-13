@@ -84,7 +84,7 @@ var gitLines = [];
 var tipStyle = ansi_colors_1.default.underline.cyan;
 var defaultPreLine = {
     title: "DO", description: "Shortcuts",
-    render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("TODO"), " with basic VIM navigation\n").concat(tipStyle("ctrl+s or :w<return>"), " to save \t ").concat(tipStyle("g"), " to switch mode   \n").concat(ansi_colors_1.default.gray("".concat(tipStyle("h/j"), " up/down movement \t\t ").concat(tipStyle("a/A/i/I"), " to enter edit mode\n").concat(tipStyle("ctrl+c"), " to exit \t\t\t ").concat(tipStyle("space"), " to set to done \n").concat(tipStyle("c"), " to 'add .' and 'commit -m' using task as msg\n"))))
+    render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("TODO"), " with basic VIM navigation\n").concat(tipStyle("ctrl+s or :w<return>"), " to save \t ").concat(tipStyle("g"), " to switch mode   \n").concat(ansi_colors_1.default.gray("".concat(tipStyle("h/j"), " up/down movement \t\t ").concat(tipStyle("a/A/i/I"), " to enter edit mode\n").concat(tipStyle("ctrl+c"), " to exit \t\t\t ").concat(tipStyle("space"), " to set to done \n").concat(tipStyle("c"), " to 'add .' and 'commit -m' using task as msg\n").concat(tipStyle("p"), " to 'push origin <current branch>'\n").concat(tipStyle("r"), " to 'git reset HEAD~1 --soft'\n"))))
 };
 var gitPreLine = {
     title: "DO", description: "Shortcuts",
@@ -114,7 +114,7 @@ var UTIL = {
         return postLine;
     },
     input: function (cursor_1, _a) { return __awaiter(void 0, [cursor_1, _a], void 0, function (cursor, _b) {
-        var isExit, isSave, isLinkOpen, isDelete, isTryingToSave, titleArray, input, _c, start, line_1, titleArray, start, currentLine, targetLine, currentLine, targetLine, start;
+        var currentLine, isExit, isSave, isLinkOpen, isDelete, isTryingToSave, titleArray, input, _c, start, line_1, titleArray, start, targetLine, targetLine, start;
         var _d;
         var name = _b.name, ctrl = _b.ctrl, meta = _b.meta, shift = _b.shift, sequence = _b.sequence;
         return __generator(this, function (_e) {
@@ -124,6 +124,7 @@ var UTIL = {
                     cursor.debug = "";
                     if (inputs.length > 3)
                         inputs.pop();
+                    currentLine = lines[cursor.y];
                     isExit = ctrl && name == 'c';
                     isSave = ctrl && name == 's';
                     isLinkOpen = shift && name == 't';
@@ -176,43 +177,71 @@ var UTIL = {
                     }
                     _c = input;
                     switch (_c) {
-                        case "g": return [3 /*break*/, 1];
-                        case "c": return [3 /*break*/, 4];
-                        case "x": return [3 /*break*/, 5];
-                        case "I": return [3 /*break*/, 6];
-                        case "i": return [3 /*break*/, 7];
-                        case "A": return [3 /*break*/, 8];
-                        case "a": return [3 /*break*/, 9];
-                        case " ": return [3 /*break*/, 10];
-                        case "\r": return [3 /*break*/, 11];
-                        case "h": return [3 /*break*/, 12];
-                        case "left": return [3 /*break*/, 12];
-                        case "l": return [3 /*break*/, 13];
-                        case "right": return [3 /*break*/, 13];
-                        case "j": return [3 /*break*/, 14];
-                        case "down": return [3 /*break*/, 14];
-                        case "k": return [3 /*break*/, 15];
-                        case "up": return [3 /*break*/, 15];
-                        case "J": return [3 /*break*/, 16];
-                        case "K": return [3 /*break*/, 17];
-                        case "link_open": return [3 /*break*/, 18];
-                        case "delete": return [3 /*break*/, 19];
-                        case "save": return [3 /*break*/, 20];
-                        case "exit": return [3 /*break*/, 21];
+                        case "r": return [3 /*break*/, 1];
+                        case "p": return [3 /*break*/, 2];
+                        case "g": return [3 /*break*/, 3];
+                        case "c": return [3 /*break*/, 6];
+                        case "x": return [3 /*break*/, 7];
+                        case "I": return [3 /*break*/, 8];
+                        case "i": return [3 /*break*/, 9];
+                        case "A": return [3 /*break*/, 10];
+                        case "a": return [3 /*break*/, 11];
+                        case " ": return [3 /*break*/, 12];
+                        case "\r": return [3 /*break*/, 13];
+                        case "h": return [3 /*break*/, 14];
+                        case "left": return [3 /*break*/, 14];
+                        case "l": return [3 /*break*/, 15];
+                        case "right": return [3 /*break*/, 15];
+                        case "j": return [3 /*break*/, 16];
+                        case "down": return [3 /*break*/, 16];
+                        case "k": return [3 /*break*/, 17];
+                        case "up": return [3 /*break*/, 17];
+                        case "J": return [3 /*break*/, 18];
+                        case "K": return [3 /*break*/, 19];
+                        case "link_open": return [3 /*break*/, 20];
+                        case "delete": return [3 /*break*/, 21];
+                        case "save": return [3 /*break*/, 22];
+                        case "exit": return [3 /*break*/, 23];
                     }
-                    return [3 /*break*/, 22];
+                    return [3 /*break*/, 24];
                 case 1:
-                    if (!(cursor.state == "git")) return [3 /*break*/, 3];
+                    if (cursor.state == "git")
+                        return [2 /*return*/, cursor];
+                    cursor.debug = "git reset HEAD~1 --soft";
+                    ACTION.list(cursor);
+                    require('child_process').exec("git reset HEAD~1 --soft", function (err, stdout, stderr) {
+                        cursor.debug = "reverted recent commit";
+                        if (err || stderr) {
+                            cursor.debug = JSON.stringify(err !== null && err !== void 0 ? err : stderr);
+                        }
+                        ACTION.list(cursor);
+                    });
+                    return [2 /*return*/, cursor];
+                case 2:
+                    if (cursor.state == "git")
+                        return [2 /*return*/, cursor];
+                    cursor.debug = "git push origin HEAD";
+                    ACTION.list(cursor);
+                    require('child_process').exec("git push origin HEAD", function (err, stdout, stderr) {
+                        cursor.debug = "pushed";
+                        if (err || stderr) {
+                            cursor.debug = JSON.stringify(err !== null && err !== void 0 ? err : stderr);
+                        }
+                        ACTION.list(cursor);
+                    });
+                    return [2 /*return*/, cursor];
+                case 3:
+                    if (!(cursor.state == "git")) return [3 /*break*/, 5];
                     gitLines = [];
                     lines = [];
                     cursor.state = "";
                     cursor.y = 0;
                     return [4 /*yield*/, ACTION.read()];
-                case 2:
+                case 4:
                     _e.sent();
                     ACTION.list(cursor);
                     return [2 /*return*/, cursor];
-                case 3:
+                case 5:
                     start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
                     require('child_process').exec("git branch --sort=-committerdate", function (err, stdout, stderr) {
                         var branches = stdout.split("\n").filter(function (v) { return v.length != 0; });
@@ -228,7 +257,7 @@ var UTIL = {
                         ACTION.list(cursor);
                     });
                     return [2 /*return*/, cursor];
-                case 4:
+                case 6:
                     if (cursor.state == "git")
                         return [2 /*return*/, cursor];
                     if (lines[cursor.y].done) {
@@ -239,35 +268,41 @@ var UTIL = {
                     lines[cursor.y].done = !Boolean(lines[cursor.y].done);
                     ACTION.save(function () {
                         require('child_process').exec("git add .", function (err, stdout, stderr) {
+                            cursor.debug = "git commit -m '" + line_1.title + "'";
+                            ACTION.list(cursor);
                             require('child_process').exec("git commit -m '" + line_1.title + "'", function (err, stdout, stderr) {
-                                cursor.debug = "git commit -m '" + line_1.title + "'";
+                                if (err || stderr) {
+                                    cursor.debug = JSON.stringify(err !== null && err !== void 0 ? err : stderr);
+                                    return ACTION.list(cursor);
+                                }
+                                cursor.debug = "committed";
                                 ACTION.list(cursor);
                             });
                         });
                     });
                     return [2 /*return*/, cursor];
-                case 5:
+                case 7:
                     titleArray = lines[cursor.y].title.split("");
                     titleArray.splice(Math.max(cursor.x, 0), 1);
                     // cursor.x -= 1;
                     lines[cursor.y].title = titleArray.join("");
                     lines[cursor.y].render = lines[cursor.y].title;
                     return [2 /*return*/, cursor];
-                case 6:
+                case 8:
                     cursor.x = 1;
-                    _e.label = 7;
-                case 7:
+                    _e.label = 9;
+                case 9:
                     // cursor.x -= 1;
                     ACTION.edit();
                     return [2 /*return*/, cursor];
-                case 8:
+                case 10:
                     cursor.x = ((_d = lines[cursor.y]) === null || _d === void 0 ? void 0 : _d.title.length) + 1;
-                    _e.label = 9;
-                case 9:
+                    _e.label = 11;
+                case 11:
                     cursor.x += 1;
                     ACTION.edit();
                     return [2 /*return*/, cursor];
-                case 10:
+                case 12:
                     if (cursor.state == "git") {
                         start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
                         require('child_process').exec("git checkout " + cursor.word, function (err, stdout, stderr) {
@@ -294,7 +329,7 @@ var UTIL = {
                     }
                     lines[cursor.y].done = !Boolean(lines[cursor.y].done);
                     return [2 /*return*/, cursor];
-                case 11:
+                case 13:
                     if (isTryingToSave) {
                         inputs = [];
                         ACTION.save();
@@ -304,49 +339,47 @@ var UTIL = {
                     ACTION.edit();
                     cursor.y = lines.length - 1;
                     return [2 /*return*/, cursor];
-                case 12:
+                case 14:
                     cursor.x -= 1;
                     return [2 /*return*/, cursor];
-                case 13:
+                case 15:
                     cursor.x += 1;
                     return [2 /*return*/, cursor];
-                case 14:
+                case 16:
                     cursor.y += 1;
                     return [2 /*return*/, cursor];
-                case 15:
+                case 17:
                     cursor.y -= 1;
                     return [2 /*return*/, cursor];
-                case 16:
-                    currentLine = lines[cursor.y];
+                case 18:
                     targetLine = lines[cursor.y + 1];
                     lines[cursor.y + 1] = currentLine;
                     lines[cursor.y] = targetLine;
                     cursor.y += 1;
                     return [2 /*return*/, cursor];
-                case 17:
-                    currentLine = lines[cursor.y];
+                case 19:
                     targetLine = lines[cursor.y - 1];
                     lines[cursor.y - 1] = currentLine;
                     lines[cursor.y] = targetLine;
                     cursor.y -= 1;
                     return [2 /*return*/, cursor];
-                case 18:
+                case 20:
                     start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
                     require('child_process').exec(start + ' ' + (cursor === null || cursor === void 0 ? void 0 : cursor.link));
                     return [2 /*return*/, cursor];
-                case 19:
+                case 21:
                     ACTION.delete();
                     return [2 /*return*/, cursor];
-                case 20:
+                case 22:
                     lines[cursor.y].render = lines[cursor.y].title;
                     isEditMode = false;
                     ACTION.save();
                     return [2 /*return*/, cursor];
-                case 21:
+                case 23:
                     process.stdout.write("\u001B[?25h");
                     process.exit();
-                    _e.label = 22;
-                case 22: return [2 /*return*/, cursor];
+                    _e.label = 24;
+                case 24: return [2 /*return*/, cursor];
             }
         });
     }); },

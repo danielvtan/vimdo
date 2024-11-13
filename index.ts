@@ -50,6 +50,8 @@ ${tipStyle("ctrl+s or :w<return>")} to save \t ${tipStyle("g")} to switch mode
 ${c.gray(`${tipStyle("h/j")} up/down movement \t\t ${tipStyle("a/A/i/I")} to enter edit mode
 ${tipStyle("ctrl+c")} to exit \t\t\t ${tipStyle("space")} to set to done 
 ${tipStyle("c")} to 'add .' and 'commit -m' using task as msg
+${tipStyle("p")} to 'push origin <current branch>'
+${tipStyle("r")} to 'git reset HEAD~1 --soft'
 `)
     }`)
 }
@@ -105,6 +107,7 @@ var UTIL = {
 
     if (inputs.length > 3) inputs.pop();
 
+    const currentLine = lines[cursor.y];
     // console.log({ name, ctrl, meta, shift, sequence }, inputs.join(""))
     const isExit = ctrl && name == 'c';
     const isSave = ctrl && name == 's';
@@ -155,6 +158,31 @@ var UTIL = {
       input = "link_open"
     }
     switch (input) {
+      //  
+      case "r":
+        if (cursor.state == "git") return cursor;
+        cursor.debug = "git reset HEAD~1 --soft";
+        ACTION.list(cursor);
+        require('child_process').exec("git reset HEAD~1 --soft", (err, stdout, stderr) => {
+          cursor.debug = "reverted recent commit";
+          if (err || stderr) {
+            cursor.debug = JSON.stringify(err ?? stderr);
+          }
+          ACTION.list(cursor);
+        });
+        return cursor;
+      case "p":
+        if (cursor.state == "git") return cursor;
+        cursor.debug = "git push origin HEAD";
+        ACTION.list(cursor);
+        require('child_process').exec("git push origin HEAD", (err, stdout, stderr) => {
+          cursor.debug = "pushed";
+          if (err || stderr) {
+            cursor.debug = JSON.stringify(err ?? stderr);
+          }
+          ACTION.list(cursor);
+        });
+        return cursor;
       case "g":
         if (cursor.state == "git") {
           gitLines = [];
@@ -192,8 +220,14 @@ var UTIL = {
         lines[cursor.y].done = !Boolean(lines[cursor.y].done);
         ACTION.save(() => {
           require('child_process').exec("git add .", (err, stdout, stderr) => {
+            cursor.debug = "git commit -m '" + line.title + "'";
+            ACTION.list(cursor);
             require('child_process').exec("git commit -m '" + line.title + "'", (err, stdout, stderr) => {
-              cursor.debug = "git commit -m '" + line.title + "'";
+              if (err || stderr) {
+                cursor.debug = JSON.stringify(err ?? stderr);
+                return ACTION.list(cursor);
+              }
+              cursor.debug = "committed";
               ACTION.list(cursor);
             });
           });
@@ -277,14 +311,12 @@ var UTIL = {
         cursor.y -= 1;
         return cursor;
       case "J":
-        var currentLine = lines[cursor.y];
         var targetLine = lines[cursor.y + 1];
         lines[cursor.y + 1] = currentLine;
         lines[cursor.y] = targetLine;
         cursor.y += 1;
         return cursor;
       case "K":
-        var currentLine = lines[cursor.y];
         var targetLine = lines[cursor.y - 1];
         lines[cursor.y - 1] = currentLine;
         lines[cursor.y] = targetLine;

@@ -210,11 +210,13 @@ var UTIL = {
                     cursor.debug = "git reset HEAD~1 --soft";
                     ACTION.list(cursor);
                     require('child_process').exec("git reset HEAD~1 --soft", function (err, stdout, stderr) {
-                        cursor.debug = "reverted recent commit";
-                        if (err || stderr) {
-                            cursor.debug = JSON.stringify(err !== null && err !== void 0 ? err : stderr);
-                        }
-                        ACTION.list(cursor);
+                        require('child_process').exec("git restore --staged .", function (err, stdout, stderr) {
+                            cursor.debug = "reverted recent commit";
+                            if (err || stderr) {
+                                cursor.debug = JSON.stringify(err !== null && err !== void 0 ? err : stderr);
+                            }
+                            ACTION.list(cursor);
+                        });
                     });
                     return [2 /*return*/, cursor];
                 case 2:

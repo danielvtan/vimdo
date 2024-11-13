@@ -43,7 +43,7 @@ vimdo filename.md
 - [x] git: set p as shortcut to push code in current branch
 - [x] git: set r to reset back to previous commit
 - [x] git: set r will also restore all staged files
-- [x] git: update r shortcut messaging
+- [x] git: update r shortcut message
 - [ ] display markdown title as project name
 - [ ] display filename as file name
 - [ ] if there is no file ask to create file

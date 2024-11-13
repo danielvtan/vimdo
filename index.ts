@@ -50,8 +50,8 @@ ${tipStyle("ctrl+s or :w<return>")} to save \t ${tipStyle("g")} to switch mode
 ${c.gray(`${tipStyle("h/j")} up/down movement \t\t ${tipStyle("a/A/i/I")} to enter edit mode
 ${tipStyle("ctrl+c")} to exit \t\t\t ${tipStyle("space")} to set to done 
 ${tipStyle("c")} to 'add .' and 'commit -m' using task as msg
+${tipStyle("r")} to 'git reset HEAD~1 --soft' to revert recent commit and keeps the changes
 ${tipStyle("p")} to 'push origin <current branch>'
-${tipStyle("r")} to 'git reset HEAD~1 --soft'
 `)
     }`)
 }

@@ -41,6 +41,7 @@ vimdo filename.md
 - [x] change help nav to git when in git mode
 - [x] git: log successful commit on c shortcut
 - [x] git: set p as shortcut to push code in current branch
+- [x] git: set r to reset back to previous commit
 - [ ] display markdown title as project name
 - [ ] display filename as file name
 - [ ] if there is no file ask to create file

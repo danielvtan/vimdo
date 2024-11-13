@@ -214,12 +214,8 @@ var UTIL = {
         return cursor;
       case "c":
         if (cursor.state == "git") return cursor;
-        if (lines[cursor.y].done) {
-          cursor.debug = "Auto commit only works on tasks not yet done"
-          return cursor;
-        }
         const line = lines[cursor.y]
-        lines[cursor.y].done = !Boolean(lines[cursor.y].done);
+        lines[cursor.y].done = true;
         ACTION.save(() => {
           require('child_process').exec("git add .", (err, stdout, stderr) => {
             cursor.debug = "git commit -m '" + line.title + "'";

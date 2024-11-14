@@ -44,6 +44,7 @@ vimdo filename.md
 - [x] git: set r to reset back to previous commit
 - [x] git: set r will also restore all staged files
 - [x] git: update r shortcut message
+- [x] release version 1.1.0
 - [ ] display markdown title as project name
 - [ ] display filename as file name
 - [ ] if there is no file ask to create file

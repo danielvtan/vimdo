@@ -49,8 +49,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.UTIL = exports.postLine = exports.gitPreLine = exports.defaultPreLine = void 0;
 var ansi_colors_1 = __importDefault(require("ansi-colors"));
 var keypress_1 = __importDefault(require("keypress"));
+var app_1 = require("./app");
 (0, keypress_1.default)(process.stdin);
 process.stdout.write("\u001B[?25l");
 process.stdin.setRawMode(true);
@@ -68,50 +70,42 @@ process.stdin.on('keypress', function (ch, key) {
     // console.log("key", key)
     if (ch && !key)
         key = { sequence: ch };
-    UTIL.input(cursor, key).then(function (c) {
-        cursor = c;
-        cursor.y = Math.min(Math.max(cursor.y, 0), lines.length - 1);
-        cursor.x = Math.min(Math.max(cursor.x, 0), lines[cursor.y].title.length + 1);
-        ACTION.list(cursor);
+    exports.UTIL.input(app_1.app.cursor, key).then(function (c) {
+        app_1.app.cursor = c;
+        app_1.app.cursor.y = Math.min(Math.max(app_1.app.cursor.y, 0), app_1.app.lines.length - 1);
+        app_1.app.cursor.x = Math.min(Math.max(app_1.app.cursor.x, 0), app_1.app.lines[app_1.app.cursor.y].title.length + 1);
+        app_1.app.render(app_1.app.cursor);
     });
 });
-var selectedFile = process.argv[2];
-for (var i = 0; i < process.argv.length; i++) {
-    console.log(process.argv[i]);
-}
-var lines = [];
-var gitLines = [];
 var tipStyle = ansi_colors_1.default.underline.cyan;
-var defaultPreLine = {
+exports.defaultPreLine = {
     title: "DO", description: "Shortcuts",
     render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("TODO"), " with basic VIM navigation\n").concat(tipStyle("ctrl+s or :w<return>"), " to save \t ").concat(tipStyle("g"), " to switch mode   \n").concat(ansi_colors_1.default.gray("".concat(tipStyle("h/j"), " up/down movement \t\t ").concat(tipStyle("a/A/i/I"), " to enter edit mode\n").concat(tipStyle("ctrl+c"), " to exit \t\t\t ").concat(tipStyle("space"), " to set to done \n").concat(tipStyle("c"), " to 'add .' and 'commit -m' using task as msg\n").concat(tipStyle("r"), " to 'git reset HEAD~1 --soft' to revert recent commit and keeps the changes\n").concat(tipStyle("p"), " to 'push origin <current branch>'\n"))))
 };
-var gitPreLine = {
+exports.gitPreLine = {
     title: "DO", description: "Shortcuts",
     render: ansi_colors_1.default.white("".concat(ansi_colors_1.default.cyanBright("GIT"), " with basic VIM navigation\n").concat(tipStyle("ctrl+s or :w<return>"), " to save \t ").concat(tipStyle("g"), " to switch mode   \n").concat(ansi_colors_1.default.gray("".concat(tipStyle("h/j"), " up/down movement \t\t ").concat(tipStyle("a/A/i/I"), " to enter edit mode\n").concat(tipStyle("ctrl+c"), " to exit \t\t\t ").concat(tipStyle("space"), " to checkout branch     \n"))))
 };
-var postLine = {
+exports.postLine = {
     title: ""
 };
 var inputs = [];
-var cursor = { x: 4, y: lines.length - 1 };
-var isEditMode = false;
-var UTIL = {
+exports.UTIL = {
     getPostLine: function () {
-        var _a, _b;
-        var postLineRender = (_b = (_a = cursor.state) !== null && _a !== void 0 ? _a : __spreadArray([], inputs, true).reverse().join("") + " " + cursor.word) !== null && _b !== void 0 ? _b : "";
-        postLine = {
+        var _a, _b, _c, _d, _e;
+        var postLineRender = (_b = (_a = app_1.app.cursor.state) !== null && _a !== void 0 ? _a : __spreadArray([], inputs, true).reverse().join("") + " " + app_1.app.cursor.word) !== null && _b !== void 0 ? _b : "";
+        exports.postLine = {
             title: ">",
             render: ansi_colors_1.default.white("> " + postLineRender),
         };
         // is link
-        var isLink = new RegExp('^(https?:\\/\\/)?((([-a-z0-9]{1,63}\\.)*?[a-z0-9]([-a-z0-9]{0,253}[a-z0-9])?\\.[a-z]{2,63})|((\\d{1,3}\\.){3}\\d{1,3}))(:\\d{1,5})?((\\/|\\?)((%[0-9a-f]{2})|[-\\w\\+\\.\\?\\/@~#&=])*)?$').test(cursor === null || cursor === void 0 ? void 0 : cursor.word);
+        var isLink = new RegExp('^(https?:\\/\\/)?((([-a-z0-9]{1,63}\\.)*?[a-z0-9]([-a-z0-9]{0,253}[a-z0-9])?\\.[a-z]{2,63})|((\\d{1,3}\\.){3}\\d{1,3}))(:\\d{1,5})?((\\/|\\?)((%[0-9a-f]{2})|[-\\w\\+\\.\\?\\/@~#&=])*)?$').test((_c = app_1.app.cursor) === null || _c === void 0 ? void 0 : _c.word);
         if (isLink) {
-            cursor.link = cursor === null || cursor === void 0 ? void 0 : cursor.word;
-            postLine.render += " shift+t to open link";
+            app_1.app.cursor.link = (_d = app_1.app.cursor) === null || _d === void 0 ? void 0 : _d.word;
+            exports.postLine.render += " shift+t to open link";
         }
-        postLine.render += (cursor === null || cursor === void 0 ? void 0 : cursor.debug) ? " " + ansi_colors_1.default.red(cursor.debug) : "";
-        return postLine;
+        exports.postLine.render += ((_e = app_1.app.cursor) === null || _e === void 0 ? void 0 : _e.debug) ? " " + ansi_colors_1.default.red(app_1.app.cursor.debug) : "";
+        return exports.postLine;
     },
     input: function (cursor_1, _a) { return __awaiter(void 0, [cursor_1, _a], void 0, function (cursor, _b) {
         var currentLine, isExit, isSave, isLinkOpen, isDelete, isTryingToSave, titleArray, input, _c, start, line_1, titleArray, start, targetLine, targetLine, start;
@@ -124,29 +118,29 @@ var UTIL = {
                     cursor.debug = "";
                     if (inputs.length > 3)
                         inputs.pop();
-                    currentLine = lines[cursor.y];
+                    currentLine = app_1.app.lines[cursor.y];
                     isExit = ctrl && name == 'c';
                     isSave = ctrl && name == 's';
                     isLinkOpen = shift && name == 't';
                     isDelete = inputs.join("").startsWith("dd");
                     isTryingToSave = inputs.join("").startsWith("\rw:");
-                    if (isEditMode) {
+                    if (app_1.app.isEditMode) {
                         if (isExit || isSave) {
                             // console.log("exit")
-                            lines[cursor.y].render = lines[cursor.y].title;
+                            app_1.app.lines[cursor.y].render = app_1.app.lines[cursor.y].title;
                             // cursor.x = 0
-                            isEditMode = false;
+                            app_1.app.isEditMode = false;
                             return [2 /*return*/, cursor];
                         }
                         if (sequence == "\r") {
-                            lines[cursor.y].render = lines[cursor.y].title;
+                            app_1.app.lines[cursor.y].render = app_1.app.lines[cursor.y].title;
                             cursor.y += 1;
-                            ACTION.create(cursor.y);
-                            cursor.x = lines[cursor.y].title.length + 1;
-                            lines[cursor.y].render = lines[cursor.y].title;
+                            app_1.app.create(cursor.y);
+                            cursor.x = app_1.app.lines[cursor.y].title.length + 1;
+                            app_1.app.lines[cursor.y].render = app_1.app.lines[cursor.y].title;
                             return [2 /*return*/, cursor];
                         }
-                        titleArray = lines[cursor.y].title.split("");
+                        titleArray = app_1.app.lines[cursor.y].title.split("");
                         if (name == "backspace") {
                             titleArray.splice(Math.max(cursor.x - 1, 0), 1);
                             cursor.x -= 1;
@@ -157,8 +151,8 @@ var UTIL = {
                                 cursor.x += 1;
                             cursor.x += 1;
                         }
-                        lines[cursor.y].title = titleArray.join("");
-                        lines[cursor.y].render = lines[cursor.y].title;
+                        app_1.app.lines[cursor.y].title = titleArray.join("");
+                        app_1.app.lines[cursor.y].render = app_1.app.lines[cursor.y].title;
                         return [2 /*return*/, cursor];
                     }
                     input = sequence;
@@ -208,14 +202,14 @@ var UTIL = {
                     if (cursor.state == "git")
                         return [2 /*return*/, cursor];
                     cursor.debug = "git reset HEAD~1 --soft";
-                    ACTION.list(cursor);
+                    app_1.app.render(cursor);
                     require('child_process').exec("git reset HEAD~1 --soft", function (err, stdout, stderr) {
                         require('child_process').exec("git restore --staged .", function (err, stdout, stderr) {
                             cursor.debug = "reverted recent commit";
                             if (err || stderr) {
                                 cursor.debug = JSON.stringify(err !== null && err !== void 0 ? err : stderr);
                             }
-                            ACTION.list(cursor);
+                            app_1.app.render(cursor);
                         });
                     });
                     return [2 /*return*/, cursor];
@@ -223,25 +217,24 @@ var UTIL = {
                     if (cursor.state == "git")
                         return [2 /*return*/, cursor];
                     cursor.debug = "git push origin HEAD";
-                    ACTION.list(cursor);
+                    app_1.app.render(cursor);
                     require('child_process').exec("git push origin HEAD", function (err, stdout, stderr) {
                         cursor.debug = "pushed";
                         if (err || stderr) {
                             cursor.debug = JSON.stringify(err !== null && err !== void 0 ? err : stderr);
                         }
-                        ACTION.list(cursor);
+                        app_1.app.render(cursor);
                     });
                     return [2 /*return*/, cursor];
                 case 3:
                     if (!(cursor.state == "git")) return [3 /*break*/, 5];
-                    gitLines = [];
-                    lines = [];
+                    app_1.app.gitLines = [];
+                    app_1.app.lines = [];
                     cursor.state = "";
-                    cursor.y = 0;
-                    return [4 /*yield*/, ACTION.read()];
+                    return [4 /*yield*/, app_1.app.read()];
                 case 4:
                     _e.sent();
-                    ACTION.list(cursor);
+                    app_1.app.render(cursor);
                     return [2 /*return*/, cursor];
                 case 5:
                     start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
@@ -251,55 +244,55 @@ var UTIL = {
                         // cursor.debug = JSON.stringify(branches)
                         cursor.state = "git";
                         cursor.y = 0;
-                        gitLines = branches.map(function (branch) {
+                        app_1.app.gitLines = branches.map(function (branch) {
                             return {
                                 title: branch.trim(),
                             };
                         });
-                        lines = gitLines;
-                        ACTION.list(cursor);
+                        app_1.app.lines = app_1.app.gitLines;
+                        app_1.app.render(cursor);
                     });
                     return [2 /*return*/, cursor];
                 case 6:
                     if (cursor.state == "git")
                         return [2 /*return*/, cursor];
-                    line_1 = lines[cursor.y];
-                    lines[cursor.y].done = true;
-                    ACTION.save(function () {
+                    line_1 = app_1.app.lines[cursor.y];
+                    app_1.app.lines[cursor.y].done = true;
+                    app_1.app.save(function () {
                         require('child_process').exec("git add .", function (err, stdout, stderr) {
                             cursor.debug = "git commit -m '" + line_1.title + "'";
-                            ACTION.list(cursor);
+                            app_1.app.render(cursor);
                             require('child_process').exec("git commit -m '" + line_1.title + "'", function (err, stdout, stderr) {
                                 if (err || stderr) {
                                     cursor.debug = JSON.stringify(err !== null && err !== void 0 ? err : stderr);
-                                    return ACTION.list(cursor);
+                                    return app_1.app.render(cursor);
                                 }
                                 cursor.debug = "committed";
-                                ACTION.list(cursor);
+                                app_1.app.render(cursor);
                             });
                         });
                     });
                     return [2 /*return*/, cursor];
                 case 7:
-                    titleArray = lines[cursor.y].title.split("");
+                    titleArray = app_1.app.lines[cursor.y].title.split("");
                     titleArray.splice(Math.max(cursor.x, 0), 1);
                     // cursor.x -= 1;
-                    lines[cursor.y].title = titleArray.join("");
-                    lines[cursor.y].render = lines[cursor.y].title;
+                    app_1.app.lines[cursor.y].title = titleArray.join("");
+                    app_1.app.lines[cursor.y].render = app_1.app.lines[cursor.y].title;
                     return [2 /*return*/, cursor];
                 case 8:
                     cursor.x = 1;
                     _e.label = 9;
                 case 9:
                     // cursor.x -= 1;
-                    ACTION.edit();
+                    app_1.app.edit();
                     return [2 /*return*/, cursor];
                 case 10:
-                    cursor.x = ((_d = lines[cursor.y]) === null || _d === void 0 ? void 0 : _d.title.length) + 1;
+                    cursor.x = ((_d = app_1.app.lines[cursor.y]) === null || _d === void 0 ? void 0 : _d.title.length) + 1;
                     _e.label = 11;
                 case 11:
                     cursor.x += 1;
-                    ACTION.edit();
+                    app_1.app.edit();
                     return [2 /*return*/, cursor];
                 case 12:
                     if (cursor.state == "git") {
@@ -309,34 +302,34 @@ var UTIL = {
                             if (stderr.includes("error: Your local changes")) {
                                 errorMessage = "Please commit local changes first";
                                 cursor.debug = errorMessage;
-                                return ACTION.list(cursor);
+                                return app_1.app.render(cursor);
                             }
                             require('child_process').exec("git branch --sort=-committerdate", function (err, stdout, stderr) {
                                 var branches = stdout.split("\n").filter(function (v) { return v.length != 0; });
                                 cursor.debug = errorMessage;
                                 cursor.state = "git";
-                                gitLines = branches.map(function (branch) {
+                                app_1.app.gitLines = branches.map(function (branch) {
                                     return {
                                         title: branch.trim(),
                                     };
                                 });
-                                lines = gitLines;
-                                ACTION.list(cursor);
+                                app_1.app.lines = app_1.app.gitLines;
+                                app_1.app.render(cursor);
                             });
                         });
                         return [2 /*return*/, cursor];
                     }
-                    lines[cursor.y].done = !Boolean(lines[cursor.y].done);
+                    app_1.app.lines[cursor.y].done = !Boolean(app_1.app.lines[cursor.y].done);
                     return [2 /*return*/, cursor];
                 case 13:
                     if (isTryingToSave) {
                         inputs = [];
-                        ACTION.save();
+                        app_1.app.save();
                         return [2 /*return*/, cursor];
                     }
-                    ACTION.create();
-                    ACTION.edit();
-                    cursor.y = lines.length - 1;
+                    app_1.app.create();
+                    app_1.app.edit();
+                    cursor.y = app_1.app.lines.length - 1;
                     return [2 /*return*/, cursor];
                 case 14:
                     cursor.x -= 1;
@@ -351,15 +344,15 @@ var UTIL = {
                     cursor.y -= 1;
                     return [2 /*return*/, cursor];
                 case 18:
-                    targetLine = lines[cursor.y + 1];
-                    lines[cursor.y + 1] = currentLine;
-                    lines[cursor.y] = targetLine;
+                    targetLine = app_1.app.lines[cursor.y + 1];
+                    app_1.app.lines[cursor.y + 1] = currentLine;
+                    app_1.app.lines[cursor.y] = targetLine;
                     cursor.y += 1;
                     return [2 /*return*/, cursor];
                 case 19:
-                    targetLine = lines[cursor.y - 1];
-                    lines[cursor.y - 1] = currentLine;
-                    lines[cursor.y] = targetLine;
+                    targetLine = app_1.app.lines[cursor.y - 1];
+                    app_1.app.lines[cursor.y - 1] = currentLine;
+                    app_1.app.lines[cursor.y] = targetLine;
                     cursor.y -= 1;
                     return [2 /*return*/, cursor];
                 case 20:
@@ -367,12 +360,12 @@ var UTIL = {
                     require('child_process').exec(start + ' ' + (cursor === null || cursor === void 0 ? void 0 : cursor.link));
                     return [2 /*return*/, cursor];
                 case 21:
-                    ACTION.delete();
+                    app_1.app.delete();
                     return [2 /*return*/, cursor];
                 case 22:
-                    lines[cursor.y].render = lines[cursor.y].title;
-                    isEditMode = false;
-                    ACTION.save();
+                    app_1.app.lines[cursor.y].render = app_1.app.lines[cursor.y].title;
+                    app_1.app.isEditMode = false;
+                    app_1.app.save();
                     return [2 /*return*/, cursor];
                 case 23:
                     process.stdout.write("\u001B[?25h");
@@ -403,7 +396,7 @@ var UTIL = {
         if (isSelected) {
             var lineTextArray = lineText.split("");
             var selectedX = cursor.x;
-            lineTextArray[selectedX] = editModeBG[isEditMode.toString()]((_e = lineTextArray[selectedX]) !== null && _e !== void 0 ? _e : " ");
+            lineTextArray[selectedX] = editModeBG[app_1.app.isEditMode.toString()]((_e = lineTextArray[selectedX]) !== null && _e !== void 0 ? _e : " ");
             var textFromStartToCursor = lineText.substring(0, cursor.x);
             var selectedWordIndex = textFromStartToCursor.replace(/[^ ]/g, "").length;
             var selectedWord = lineText.split(" ")[selectedWordIndex];
@@ -424,136 +417,118 @@ var UTIL = {
         return index == undefined ? prefix + value : render;
     }
 };
-var preTodo = "";
-var postTodo = "";
-var listHeader = "";
-var linkList = {};
-var ACTION = {
-    read: function () { return __awaiter(void 0, void 0, void 0, function () {
-        var fs, directory, fileSearch, fileOptions, data, e_1, listHeaderIndex, startIndex, lastIndex;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    fs = require('node:fs/promises');
-                    return [4 /*yield*/, fs.readdir("./")];
-                case 1:
-                    directory = _a.sent();
-                    console.log(directory);
-                    fileSearch = ["todo.md", "readme.md"];
-                    fileOptions = [];
-                    directory.map(function (f) {
-                        if (fileSearch.includes(f.toLowerCase())) {
-                            fileOptions.push(f);
-                        }
-                    });
-                    selectedFile = selectedFile !== null && selectedFile !== void 0 ? selectedFile : fileOptions[0];
-                    console.log(selectedFile);
-                    _a.label = 2;
-                case 2:
-                    _a.trys.push([2, 4, , 5]);
-                    return [4 /*yield*/, fs.readFile(selectedFile, { encoding: 'utf8' })];
-                case 3:
-                    data = _a.sent();
-                    return [3 /*break*/, 5];
-                case 4:
-                    e_1 = _a.sent();
-                    console.log(e_1);
-                    data = "# TODO\n\n- [ ] ";
-                    return [3 /*break*/, 5];
-                case 5:
-                    listHeaderIndex = data.split("\n").findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); }) - 1;
-                    startIndex = data.split("\n").findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
-                    lastIndex = data.split("\n").findLastIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
-                    // Math.max(cursor.x - 2, 0)console.log(startIndex, lastIndex)
-                    listHeader = data.split("\n")[listHeaderIndex];
-                    preTodo = data.split("\n").slice(0, startIndex).join("\n") + "\n";
-                    postTodo = "\n" + data.split("\n").slice(lastIndex + 1, data.split("\n").length - 1).join("\n");
-                    data = data.split("\n").slice(startIndex, lastIndex + 1).filter(function (d) { return d; }).map(function (d) {
-                        var _a;
-                        return {
-                            title: (_a = d.split("- [ ] ")[1]) !== null && _a !== void 0 ? _a : d.split("- [x] ")[1],
-                            type: "TASK",
-                            done: Boolean(d.split("- [x] ")[1])
-                        };
-                    });
-                    lines = lines.concat(data);
-                    return [2 /*return*/];
-            }
-        });
-    }); },
-    save: function (onSaveCallback) {
-        if (onSaveCallback === void 0) { onSaveCallback = undefined; }
-        cursor.state = "saving";
-        ACTION.list(cursor);
-        var fs = require('node:fs');
-        var todo = lines.map(function (line) { return UTIL.format({ line: line }); }).join("\n");
-        var content = preTodo + todo + postTodo;
-        fs.writeFile(selectedFile !== null && selectedFile !== void 0 ? selectedFile : "todo.md", content, function (err) {
-            if (err) {
-                console.error(err);
-            }
-            else {
-            }
-            onSaveCallback && onSaveCallback();
-            setTimeout(function () {
-                delete cursor.state;
-                ACTION.list(cursor);
-            }, 500);
-        });
-    },
-    delete: function () {
-        lines.splice(cursor.y, 1);
-    },
-    cancel: function () {
-    },
-    list: function (cursor) { return __awaiter(void 0, void 0, void 0, function () {
-        var preLine;
-        return __generator(this, function (_a) {
-            console.clear();
-            preLine = cursor.state == "git" ? gitPreLine : defaultPreLine;
-            process.stdout.write(UTIL.format({ line: preLine }) + "\n" +
-                UTIL.format({ line: { render: ansi_colors_1.default.cyan(listHeader) } }) + "\n" +
-                lines.map(function (line, index) {
-                    return UTIL.format({
-                        line: line,
-                        index: index,
-                        cursor: cursor
-                    }) + "\n";
-                }).join("")
-                + "\n" + UTIL.format({ line: UTIL.getPostLine() }));
-            return [2 /*return*/];
-        });
-    }); },
-    edit: function () {
-        isEditMode = true;
-    },
-    create: function () {
-        var args_1 = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args_1[_i] = arguments[_i];
-        }
-        return __awaiter(void 0, __spreadArray([], args_1, true), void 0, function (line) {
-            if (line === void 0) { line = lines.length; }
-            return __generator(this, function (_a) {
-                lines.splice(line, 0, {
-                    title: "",
-                    type: "TASK",
-                    done: false
-                });
-                return [2 /*return*/];
-            });
-        });
-    }
-};
+// const linkList = {};
+// var app = {
+//   read: async () => {
+//     const fs = require('node:fs/promises');
+//     let directory = await fs.readdir("./");
+//     console.log(directory);
+//
+//
+//     var fileSearch = ["todo.md", "readme.md"];
+//     var fileOptions = [];
+//     directory.map((f: string) => {
+//       if (fileSearch.includes(f.toLowerCase())) {
+//         fileOptions.push(f);
+//       }
+//     });
+//     selectedFile = selectedFile ?? fileOptions[0];
+//     console.log(selectedFile)
+//     let data: any;
+//     try {
+//       data = await fs.readFile(selectedFile, { encoding: 'utf8' });
+//     } catch (e) {
+//       console.log(e);
+//       data = "# TODO\n\n- [ ] ";
+//     }
+//     const listHeaderIndex = data.split("\n").findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]")) - 1;
+//     const startIndex = data.split("\n").findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
+//     const lastIndex = data.split("\n").findLastIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
+//     // Math.max(cursor.x - 2, 0)console.log(startIndex, lastIndex)
+//     listHeader = data.split("\n")[listHeaderIndex];
+//     preTodo = data.split("\n").slice(0, startIndex).join("\n") + "\n";
+//     postTodo = "\n" + data.split("\n").slice(lastIndex + 1, data.split("\n").length - 1).join("\n");
+//     data = data.split("\n").slice(startIndex, lastIndex + 1).filter(d => d).map(d => {
+//       return {
+//         title: d.split("- [ ] ")[1] ?? d.split("- [x] ")[1],
+//         type: "TASK",
+//         done: Boolean(d.split("- [x] ")[1])
+//       }
+//     })
+//     lines = lines.concat(data);
+//     cursor.x = 0
+//     cursor.y = lines.length - 1;
+//   },
+//   save: (onSaveCallback = undefined) => {
+//     cursor.state = "saving"
+//
+//     app.render(cursor);
+//     const fs = require('node:fs');
+//     const todo = lines.map(line => UTIL.format({ line })).join("\n");
+//
+//     const content = preTodo + todo + postTodo;
+//     fs.writeFile(selectedFile ?? "todo.md", content, (err: any) => {
+//       if (err) {
+//         console.error(err);
+//       } else {
+//       }
+//
+//       onSaveCallback && onSaveCallback();
+//
+//       setTimeout(() => {
+//         delete cursor.state
+//         app.render(cursor);
+//       }, 500)
+//     });
+//   },
+//   delete: () => {
+//     lines.splice(cursor.y, 1)
+//   },
+//   cancel: () => {
+//   },
+//   render: async (cursor: Cursor) => {
+//     console.clear();
+//     // process.stdout.write('\x1Bc')
+//     // for (let index = 0; index < lines.length + 1; index++) {
+//     //   process.stdout.readableDidRead(0, -1);
+//     //   process.stdout.clearLine();
+//     // }
+//
+//     const preLine: Line = cursor.state == "git" ? gitPreLine : defaultPreLine;
+//     process.stdout.write(
+//       UTIL.format({ line: preLine }) + "\n" +
+//
+//       UTIL.format({ line: { render: c.cyan(listHeader) } }) + "\n" +
+//       lines.map((line, index) => {
+//         return UTIL.format({
+//           line,
+//           index,
+//           cursor
+//         }) + "\n"
+//
+//       }).join("")
+//       + "\n" + UTIL.format({ line: UTIL.getPostLine() })
+//     );
+//   },
+//   edit: () => {
+//     isEditMode = true;
+//   },
+//   create: async (line = lines.length) => {
+//     lines.splice(line, 0, {
+//       title: "",
+//       type: "TASK",
+//       done: false
+//     })
+//   }
+// }
 function init() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, ACTION.read()];
+                case 0: return [4 /*yield*/, app_1.app.read()];
                 case 1:
                     _a.sent();
-                    cursor = { x: 0, y: lines.length - 1 };
-                    ACTION["list"](cursor);
+                    app_1.app.render(app_1.app.cursor);
                     return [2 /*return*/];
             }
         });

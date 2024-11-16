@@ -46,7 +46,8 @@ vimdo filename.md
 - [x] git: update r shortcut message
 - [x] release version 1.1.0
 - [x] git: limit branch list to latest 10
-- [ ] display markdown title as project name
+- [ ] display markdown title has project name
+- [ ] fix bug where you cannnot create a task on first setup
 - [ ] display filename as file name
 - [ ] if there is no file ask to create file
 - [ ] add pomodoro option. ex. tasks with timer

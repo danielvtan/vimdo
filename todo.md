@@ -46,7 +46,8 @@ vimdo filename.md
 - [x] git: update r shortcut message
 - [x] release version 1.1.0
 - [x] git: limit branch list to latest 10
-- [x] git: fixed bug on branch list length
+- [ ] git: add git merge shortcut
+- [ ] git: add custom commit shortcut option
 - [ ] display markdown title has project name
 - [ ] fix bug where you cannnot create a task on first setup
 - [ ] display filename as file name

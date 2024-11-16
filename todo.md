@@ -47,7 +47,8 @@ vimdo filename.md
 - [x] release version 1.1.0
 - [x] git: limit branch list to latest 10
 - [ ] git: add git merge shortcut
-- [ ] git: add custom commit shortcut option
+- [ ] git: add min branch length check to remove error
+- [ ] git: add custom commit option shortcut
 - [ ] display markdown title has project name
 - [ ] fix bug where you cannnot create a task on first setup
 - [ ] display filename as file name

@@ -240,7 +240,7 @@ exports.UTIL = {
                     start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
                     require('child_process').exec("git branch --sort=-committerdate", function (err, stdout, stderr) {
                         var branches = stdout.split("\n").filter(function (v) { return v.length != 0; });
-                        branches.length = 10;
+                        branches.length = Math.min(10, branches.length);
                         // cursor.debug = JSON.stringify(branches)
                         cursor.state = "git";
                         cursor.y = 0;

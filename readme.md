@@ -45,6 +45,7 @@ vimdo filename.md
 - [x] git: set r will also restore all staged files
 - [x] git: update r shortcut message
 - [x] release version 1.1.0
+- [x] git: limit branch list to latest 10
 - [ ] display markdown title as project name
 - [ ] display filename as file name
 - [ ] if there is no file ask to create file
@@ -52,6 +53,8 @@ vimdo filename.md
 - [ ] add option for multiline tasks  when pressing enter twice
 - [ ] add option to create sub task when pressing tab
 - [ ] add set default option
+- [ ] add ability to run terminal commands
+- [ ] add .config file for shortcuts
 - [ ] add progress view
 - [ ] support multiple lists
 - [ ] move task to other lists (ex. backlog, todo, done)

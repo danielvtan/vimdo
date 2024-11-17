@@ -22,7 +22,7 @@ class App {
     // app.lines.length - 1
   }
   async read() {
-    let selectedFile = this.selectedFile;
+    // let selectedFile = this.selectedFile;
     const fs = require('node:fs/promises');
     let directory = await fs.readdir("./");
     console.log(directory);
@@ -34,12 +34,12 @@ class App {
         fileOptions.push(f);
       }
     });
-    selectedFile = selectedFile ?? fileOptions[0];
+    this.selectedFile = this.selectedFile ?? fileOptions[0];
 
-    console.log(selectedFile)
+    console.log(this.selectedFile)
     let data: any;
     try {
-      data = await fs.readFile(selectedFile, { encoding: 'utf8' });
+      data = await fs.readFile(this.selectedFile, { encoding: 'utf8' });
     } catch (e) {
       console.log(e);
       data = "# TODO\n\n- [ ] ";

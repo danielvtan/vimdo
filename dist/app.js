@@ -59,15 +59,15 @@ var App = /** @class */ (function () {
     }
     App.prototype.read = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var selectedFile, fs, directory, fileSearch, fileOptions, data, e_1, listHeaderIndex, startIndex, lastIndex;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var fs, directory, fileSearch, fileOptions, data, e_1, listHeaderIndex, startIndex, lastIndex;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        selectedFile = this.selectedFile;
                         fs = require('node:fs/promises');
                         return [4 /*yield*/, fs.readdir("./")];
                     case 1:
-                        directory = _a.sent();
+                        directory = _b.sent();
                         console.log(directory);
                         fileSearch = ["todo.md", "readme.md"];
                         fileOptions = [];
@@ -76,17 +76,17 @@ var App = /** @class */ (function () {
                                 fileOptions.push(f);
                             }
                         });
-                        selectedFile = selectedFile !== null && selectedFile !== void 0 ? selectedFile : fileOptions[0];
-                        console.log(selectedFile);
-                        _a.label = 2;
+                        this.selectedFile = (_a = this.selectedFile) !== null && _a !== void 0 ? _a : fileOptions[0];
+                        console.log(this.selectedFile);
+                        _b.label = 2;
                     case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, fs.readFile(selectedFile, { encoding: 'utf8' })];
+                        _b.trys.push([2, 4, , 5]);
+                        return [4 /*yield*/, fs.readFile(this.selectedFile, { encoding: 'utf8' })];
                     case 3:
-                        data = _a.sent();
+                        data = _b.sent();
                         return [3 /*break*/, 5];
                     case 4:
-                        e_1 = _a.sent();
+                        e_1 = _b.sent();
                         console.log(e_1);
                         data = "# TODO\n\n- [ ] ";
                         return [3 /*break*/, 5];

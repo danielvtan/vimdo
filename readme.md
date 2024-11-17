@@ -46,6 +46,10 @@ vimdo filename.md
 - [x] git: update r shortcut message
 - [x] release version 1.1.0
 - [x] git: limit branch list to latest 10
+- [ ] bug: when reading filename readme.md automatically the file saves as todo.md instead of the same filename 
+- [ ] git: add git merge shortcut
+- [ ] git: add min branch length check to remove error
+- [ ] git: add custom commit option shortcut
 - [ ] display markdown title has project name
 - [ ] fix bug where you cannnot create a task on first setup
 - [ ] display filename as file name
@@ -65,3 +69,6 @@ vimdo filename.md
 - [ ] vim: delete from cursor to end of word (d+w)
 - [ ] sync: to a web app
 - [ ] sync: to a mobile app
+- [ ] ux: delete task on backspace if the task is empty
+- [ ] ux: autosave when pressing ctrl+s 
+

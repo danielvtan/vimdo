@@ -53,7 +53,6 @@ class App {
     this.listHeader = dataSplit[listHeaderIndex];
     this.preTodo = dataSplit.slice(0, startIndex).join("\n") + "\n";
     this.postTodo = "\n" + dataSplit.slice(lastIndex + 1, dataSplit.length - 1).join("\n");
-
     const taskSplit = dataSplit.slice(startIndex, lastIndex + 1);
     this.doneLines = taskSplit.filter(d => d && d.split("- [x] ")[1]).map(d => {
       return {

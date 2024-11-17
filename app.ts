@@ -44,14 +44,15 @@ class App {
       console.log(e);
       data = "# TODO\n\n- [ ] ";
     }
-    const listHeaderIndex = data.split("\n").findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]")) - 1;
-    const startIndex = data.split("\n").findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
-    const lastIndex = data.split("\n").findLastIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
-    // Math.max(cursor.x - 2, 0)console.log(startIndex, lastIndex)
-    this.listHeader = data.split("\n")[listHeaderIndex];
-    this.preTodo = data.split("\n").slice(0, startIndex).join("\n") + "\n";
-    this.postTodo = "\n" + data.split("\n").slice(lastIndex + 1, data.split("\n").length - 1).join("\n");
-    data = data.split("\n").slice(startIndex, lastIndex + 1).filter(d => d).map(d => {
+
+    const dataSplit = data.split("\n");
+    const listHeaderIndex = dataSplit.findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]")) - 1;
+    const startIndex = dataSplit.findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
+    const lastIndex = dataSplit.findIndex((x, index) => index >= startIndex && !x.startsWith("- [ ]") && !x.startsWith("- [x]")) - 1;
+    this.listHeader = dataSplit[listHeaderIndex];
+    this.preTodo = dataSplit.slice(0, startIndex).join("\n") + "\n";
+    this.postTodo = "\n" + dataSplit.slice(lastIndex + 1, dataSplit.length - 1).join("\n");
+    data = dataSplit.slice(startIndex, lastIndex + 1).filter(d => d).map(d => {
       return {
         title: d.split("- [ ] ")[1] ?? d.split("- [x] ")[1],
         type: "TASK",

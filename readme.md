@@ -50,10 +50,10 @@ vimdo filename.md
 - [ ] git: add git merge shortcut
 - [ ] git: add min branch length check to remove error
 - [ ] git: add custom commit option shortcut
-- [ ] display markdown title has project name
+- [x] display markdown title has project name
 - [ ] fix bug where you cannnot create a task on first setup
 - [ ] display filename as file name
-- [ ] if there is no file ask to create file
+- [x] if there is no file ask to create file
 - [ ] add pomodoro option. ex. tasks with timer
 - [ ] add option for multiline tasks  when pressing enter twice
 - [ ] add option to create sub task when pressing tab

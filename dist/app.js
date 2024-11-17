@@ -59,7 +59,7 @@ var App = /** @class */ (function () {
     }
     App.prototype.read = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var fs, directory, fileSearch, fileOptions, data, e_1, listHeaderIndex, startIndex, lastIndex;
+            var fs, directory, fileSearch, fileOptions, data, e_1, dataSplit, listHeaderIndex, startIndex, lastIndex;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -91,14 +91,14 @@ var App = /** @class */ (function () {
                         data = "# TODO\n\n- [ ] ";
                         return [3 /*break*/, 5];
                     case 5:
-                        listHeaderIndex = data.split("\n").findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); }) - 1;
-                        startIndex = data.split("\n").findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
-                        lastIndex = data.split("\n").findLastIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
-                        // Math.max(cursor.x - 2, 0)console.log(startIndex, lastIndex)
-                        this.listHeader = data.split("\n")[listHeaderIndex];
-                        this.preTodo = data.split("\n").slice(0, startIndex).join("\n") + "\n";
-                        this.postTodo = "\n" + data.split("\n").slice(lastIndex + 1, data.split("\n").length - 1).join("\n");
-                        data = data.split("\n").slice(startIndex, lastIndex + 1).filter(function (d) { return d; }).map(function (d) {
+                        dataSplit = data.split("\n");
+                        listHeaderIndex = dataSplit.findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); }) - 1;
+                        startIndex = dataSplit.findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
+                        lastIndex = dataSplit.findIndex(function (x, index) { return index >= startIndex && !x.startsWith("- [ ]") && !x.startsWith("- [x]"); }) - 1;
+                        this.listHeader = dataSplit[listHeaderIndex];
+                        this.preTodo = dataSplit.slice(0, startIndex).join("\n") + "\n";
+                        this.postTodo = "\n" + dataSplit.slice(lastIndex + 1, dataSplit.length - 1).join("\n");
+                        data = dataSplit.slice(startIndex, lastIndex + 1).filter(function (d) { return d; }).map(function (d) {
                             var _a;
                             return {
                                 title: (_a = d.split("- [ ] ")[1]) !== null && _a !== void 0 ? _a : d.split("- [x] ")[1],

@@ -48,10 +48,11 @@ vimdo filename.md
 - [x] git: limit branch list to latest 10
 - [x] bug: when reading filename readme.md automatically the file saves as todo.md instead of the same filename 
 - [x] display markdown title has project name
+- [x] hide done on load file
+- [x] change color of unselected to white
 - [ ] git: add git merge shortcut
 - [ ] git: add min branch length check to remove error
 - [ ] git: add custom commit option shortcut
-- [x] hide done on load file
 - [ ] fix bug where you cannnot create a task on first setup
 - [ ] display filename as file name
 - [ ] if there is no file ask to create file
@@ -71,4 +72,4 @@ vimdo filename.md
 - [ ] sync: to a web app
 - [ ] sync: to a mobile app
 - [ ] ux: delete task on backspace if the task is empty
-- [ ] ux: autosave when pressing ctrl+s wiw
+- [ ] ux: autosave when pressing ctrl+s

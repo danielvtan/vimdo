@@ -358,7 +358,7 @@ export const UTIL = {
       render = c.cyan(render)
       prefix = c.cyan(prefix)
     } else {
-      render = c.white.dim(render)
+      render = c.white(render)
     }
     render = prefix + render;
     return index == undefined ? prefix + value : render;

@@ -411,7 +411,7 @@ exports.UTIL = {
             prefix = ansi_colors_1.default.cyan(prefix);
         }
         else {
-            render = ansi_colors_1.default.white.dim(render);
+            render = ansi_colors_1.default.white(render);
         }
         render = prefix + render;
         return index == undefined ? prefix + value : render;

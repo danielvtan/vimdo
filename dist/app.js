@@ -46,6 +46,7 @@ var App = /** @class */ (function () {
     function App() {
         this.cursor = { x: 4, y: 0 };
         this.lines = [];
+        this.doneLines = [];
         this.gitLines = [];
         this.preTodo = "";
         this.postTodo = "";
@@ -59,15 +60,15 @@ var App = /** @class */ (function () {
     }
     App.prototype.read = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var selectedFile, fs, directory, fileSearch, fileOptions, data, e_1, listHeaderIndex, startIndex, lastIndex;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var fs, directory, fileSearch, fileOptions, data, e_1, dataSplit, listHeaderIndex, startIndex, lastIndex, taskSplit, lines;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        selectedFile = this.selectedFile;
                         fs = require('node:fs/promises');
                         return [4 /*yield*/, fs.readdir("./")];
                     case 1:
-                        directory = _a.sent();
+                        directory = _b.sent();
                         console.log(directory);
                         fileSearch = ["todo.md", "readme.md"];
                         fileOptions = [];
@@ -76,37 +77,44 @@ var App = /** @class */ (function () {
                                 fileOptions.push(f);
                             }
                         });
-                        selectedFile = selectedFile !== null && selectedFile !== void 0 ? selectedFile : fileOptions[0];
-                        console.log(selectedFile);
-                        _a.label = 2;
+                        this.selectedFile = (_a = this.selectedFile) !== null && _a !== void 0 ? _a : fileOptions[0];
+                        console.log(this.selectedFile);
+                        _b.label = 2;
                     case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, fs.readFile(selectedFile, { encoding: 'utf8' })];
+                        _b.trys.push([2, 4, , 5]);
+                        return [4 /*yield*/, fs.readFile(this.selectedFile, { encoding: 'utf8' })];
                     case 3:
-                        data = _a.sent();
+                        data = _b.sent();
                         return [3 /*break*/, 5];
                     case 4:
-                        e_1 = _a.sent();
+                        e_1 = _b.sent();
                         console.log(e_1);
                         data = "# TODO\n\n- [ ] ";
                         return [3 /*break*/, 5];
                     case 5:
-                        listHeaderIndex = data.split("\n").findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); }) - 1;
-                        startIndex = data.split("\n").findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
-                        lastIndex = data.split("\n").findLastIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
-                        // Math.max(cursor.x - 2, 0)console.log(startIndex, lastIndex)
-                        this.listHeader = data.split("\n")[listHeaderIndex];
-                        this.preTodo = data.split("\n").slice(0, startIndex).join("\n") + "\n";
-                        this.postTodo = "\n" + data.split("\n").slice(lastIndex + 1, data.split("\n").length - 1).join("\n");
-                        data = data.split("\n").slice(startIndex, lastIndex + 1).filter(function (d) { return d; }).map(function (d) {
-                            var _a;
+                        dataSplit = data.split("\n");
+                        listHeaderIndex = dataSplit.findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); }) - 1;
+                        startIndex = dataSplit.findIndex(function (x) { return x.startsWith("- [ ]") || x.startsWith("- [x]"); });
+                        lastIndex = dataSplit.findIndex(function (x, index) { return index >= startIndex && !x.startsWith("- [ ]") && !x.startsWith("- [x]"); }) - 1;
+                        this.listHeader = dataSplit[listHeaderIndex];
+                        this.preTodo = dataSplit.slice(0, startIndex).join("\n") + "\n";
+                        this.postTodo = "\n" + dataSplit.slice(lastIndex + 1, dataSplit.length - 1).join("\n");
+                        taskSplit = dataSplit.slice(startIndex, lastIndex + 1);
+                        this.doneLines = taskSplit.filter(function (d) { return d && d.split("- [x] ")[1]; }).map(function (d) {
                             return {
-                                title: (_a = d.split("- [ ] ")[1]) !== null && _a !== void 0 ? _a : d.split("- [x] ")[1],
+                                title: d.split("- [x] ")[1], // ?? d.split("- [x] ")[1],
                                 type: "TASK",
-                                done: Boolean(d.split("- [x] ")[1])
+                                done: true
                             };
                         });
-                        this.lines = this.lines.concat(data);
+                        lines = taskSplit.filter(function (d) { return d && d.split("- [ ] ")[1]; }).map(function (d) {
+                            return {
+                                title: d.split("- [ ] ")[1], // ?? d.split("- [x] ")[1],
+                                type: "TASK",
+                                done: false
+                            };
+                        });
+                        this.lines = this.lines.concat(lines);
                         this.cursor.x = 0;
                         this.cursor.y = this.lines.length - 1;
                         return [2 /*return*/];
@@ -122,7 +130,8 @@ var App = /** @class */ (function () {
         this.render(this.cursor);
         var fs = require('node:fs');
         var todo = this.lines.map(function (line) { return _1.UTIL.format({ line: line }); }).join("\n");
-        var content = this.preTodo + todo + this.postTodo;
+        var done = this.doneLines.map(function (line) { return _1.UTIL.format({ line: line }); }).join("\n") + "\n";
+        var content = this.preTodo + done + todo + this.postTodo;
         fs.writeFile((_a = this.selectedFile) !== null && _a !== void 0 ? _a : "todo.md", content, function (err) {
             if (err) {
                 console.error(err);

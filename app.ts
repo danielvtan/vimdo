@@ -8,6 +8,7 @@ class App {
 
   cursor: Cursor = { x: 4, y: 0 };
   lines: Line[] = [];
+  doneLines: Line[] = [];
   gitLines: Line[] = [];
   selectedFile: string;
   preTodo: string = "";
@@ -22,7 +23,7 @@ class App {
     // app.lines.length - 1
   }
   async read() {
-    let selectedFile = this.selectedFile;
+    // let selectedFile = this.selectedFile;
     const fs = require('node:fs/promises');
     let directory = await fs.readdir("./");
     console.log(directory);
@@ -34,31 +35,41 @@ class App {
         fileOptions.push(f);
       }
     });
-    selectedFile = selectedFile ?? fileOptions[0];
+    this.selectedFile = this.selectedFile ?? fileOptions[0];
 
-    console.log(selectedFile)
+    console.log(this.selectedFile)
     let data: any;
     try {
-      data = await fs.readFile(selectedFile, { encoding: 'utf8' });
+      data = await fs.readFile(this.selectedFile, { encoding: 'utf8' });
     } catch (e) {
       console.log(e);
       data = "# TODO\n\n- [ ] ";
     }
-    const listHeaderIndex = data.split("\n").findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]")) - 1;
-    const startIndex = data.split("\n").findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
-    const lastIndex = data.split("\n").findLastIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
-    // Math.max(cursor.x - 2, 0)console.log(startIndex, lastIndex)
-    this.listHeader = data.split("\n")[listHeaderIndex];
-    this.preTodo = data.split("\n").slice(0, startIndex).join("\n") + "\n";
-    this.postTodo = "\n" + data.split("\n").slice(lastIndex + 1, data.split("\n").length - 1).join("\n");
-    data = data.split("\n").slice(startIndex, lastIndex + 1).filter(d => d).map(d => {
+
+    const dataSplit = data.split("\n");
+    const listHeaderIndex = dataSplit.findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]")) - 1;
+    const startIndex = dataSplit.findIndex(x => x.startsWith("- [ ]") || x.startsWith("- [x]"))
+    const lastIndex = dataSplit.findIndex((x, index) => index >= startIndex && !x.startsWith("- [ ]") && !x.startsWith("- [x]")) - 1;
+    this.listHeader = dataSplit[listHeaderIndex];
+    this.preTodo = dataSplit.slice(0, startIndex).join("\n") + "\n";
+    this.postTodo = "\n" + dataSplit.slice(lastIndex + 1, dataSplit.length - 1).join("\n");
+
+    const taskSplit = dataSplit.slice(startIndex, lastIndex + 1);
+    this.doneLines = taskSplit.filter(d => d && d.split("- [x] ")[1]).map(d => {
       return {
-        title: d.split("- [ ] ")[1] ?? d.split("- [x] ")[1],
+        title: d.split("- [x] ")[1], // ?? d.split("- [x] ")[1],
         type: "TASK",
-        done: Boolean(d.split("- [x] ")[1])
+        done: true
       }
     })
-    this.lines = this.lines.concat(data);
+    const lines = taskSplit.filter(d => d && d.split("- [ ] ")[1]).map(d => {
+      return {
+        title: d.split("- [ ] ")[1], // ?? d.split("- [x] ")[1],
+        type: "TASK",
+        done: false
+      }
+    })
+    this.lines = this.lines.concat(lines);
     this.cursor.x = 0
     this.cursor.y = this.lines.length - 1;
   }
@@ -68,8 +79,9 @@ class App {
     this.render(this.cursor);
     const fs = require('node:fs');
     const todo = this.lines.map(line => UTIL.format({ line })).join("\n");
+    const done = this.doneLines.map(line => UTIL.format({ line })).join("\n") + "\n";
 
-    const content = this.preTodo + todo + this.postTodo;
+    const content = this.preTodo + done + todo + this.postTodo;
     fs.writeFile(this.selectedFile ?? "todo.md", content, (err: any) => {
       if (err) {
         console.error(err);
